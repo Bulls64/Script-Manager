@@ -23,6 +23,7 @@ A Windows 11–style launcher for a set of Windows customization scripts: shutdo
 - **Favorites**: drop your own `.bat` or `.cmd` files in the `scripts` folder and add them as cards.
 - **Appearance**: light, dark or system theme, six accent colors, Mica and a transparency slider on Windows 11.
 - **Language**: English, French or the Windows language.
+- **Updates**: checks this repository's releases at startup or on demand, and installs the new version in place.
 
 <p align="center">
   <img src="docs/screenshots/system-light.png" alt="System page, light theme" width="49%">
@@ -45,6 +46,15 @@ cd Script-Manager
 py -3 -m pip install -r requirements.txt
 py -3 Script-Manager.pyw
 ```
+
+### Updates
+
+Settings › Updates › "Check for updates at startup" (on by default) asks GitHub for the [latest release](https://github.com/Bulls64/Script-Manager/releases/latest) a few seconds after startup; "Check now" does the same on demand. Nothing is downloaded until you click **Install**. The app then:
+
+1. downloads `Script-Manager-<version>.zip` and checks it against the `.sha256` file published with the release;
+2. closes, copies the new files over the old ones and starts again (the log of this step is `%LOCALAPPDATA%\Scripts-Windows\update.log`).
+
+Your settings, your favorite scripts and the entries you added to `scripts.json` are kept; the built-in scripts are replaced by the new ones. Installing in place only works for the EXE extracted from a release, in a folder you can write to. When running from source or from a local build, the button opens the release page instead (`git pull` updates a clone).
 
 ## Included scripts
 
@@ -165,6 +175,7 @@ Un lanceur au style de Windows 11 pour une série de scripts de personnalisation
 - **Favoris** : dépose tes propres `.bat` ou `.cmd` dans le dossier `scripts` et ajoute-les en cartes.
 - **Apparence** : thème clair, sombre ou système, six couleurs d’accentuation, Mica et curseur de transparence sous Windows 11.
 - **Langue** : français, anglais ou langue de Windows.
+- **Mises à jour** : vérifie les releases de ce dépôt au démarrage ou à la demande, et installe la nouvelle version sur place.
 
 <p align="center">
   <img src="docs/screenshots/systeme-clair.png" alt="Page Système, thème clair" width="49%">
@@ -187,6 +198,15 @@ cd Script-Manager
 py -3 -m pip install -r requirements.txt
 py -3 Script-Manager.pyw
 ```
+
+### Mises à jour
+
+Paramètres › Mises à jour › « Rechercher les mises à jour au démarrage » (activé par défaut) interroge GitHub sur la [dernière release](https://github.com/Bulls64/Script-Manager/releases/latest) quelques secondes après le démarrage ; « Rechercher » fait la même chose à la demande. Rien n’est téléchargé tant que tu n’as pas cliqué sur **Installer**. L’application :
+
+1. télécharge `Script-Manager-<version>.zip` et le vérifie avec le fichier `.sha256` publié avec la release ;
+2. se ferme, copie les nouveaux fichiers par-dessus les anciens et redémarre (le journal de cette étape est `%LOCALAPPDATA%\Scripts-Windows\update.log`).
+
+Tes réglages, tes scripts en favori et les entrées que tu as ajoutées à `scripts.json` sont conservés ; les scripts intégrés sont remplacés par les nouveaux. L’installation sur place ne fonctionne que pour l’EXE décompressé d’une release, dans un dossier où tu peux écrire. Depuis les sources ou un build local, le bouton ouvre la page de la release (`git pull` met un clone à jour).
 
 ## Scripts inclus
 

@@ -383,6 +383,9 @@ class Settings:
     # Scripts personnels mis en favori (noms de fichiers du dossier des scripts).
     # Personal scripts marked as favorites (file names in the scripts folder).
     favorites: list[str] = field(default_factory=list)
+    # Recherche d'une nouvelle version sur GitHub au démarrage.
+    # Check GitHub for a new version at startup.
+    update_check: bool = True
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Settings:
@@ -399,8 +402,9 @@ class Settings:
         transparency = data.get("transparency")
         if isinstance(transparency, int) and not isinstance(transparency, bool):
             settings.transparency = min(max(transparency, 0), TRANSPARENCY_MAX)
-        if isinstance(data.get("restore_point"), bool):
-            settings.restore_point = data["restore_point"]
+        for key in ("restore_point", "update_check"):
+            if isinstance(data.get(key), bool):
+                setattr(settings, key, data[key])
         favorites = data.get("favorites")
         if isinstance(favorites, list):
             seen: set[str] = set()
@@ -419,6 +423,7 @@ class Settings:
             "language": self.language,
             "restore_point": self.restore_point,
             "favorites": list(self.favorites),
+            "update_check": self.update_check,
         }
 
 

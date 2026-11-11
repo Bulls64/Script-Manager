@@ -9,6 +9,9 @@ import contextlib
 import ctypes
 import logging
 import sys
+import tempfile
+import threading
+from collections.abc import Callable
 from dataclasses import dataclass, replace
 from datetime import datetime
 from pathlib import Path
@@ -21,9 +24,11 @@ from PySide6.QtCore import (
     Qt,
     QTimer,
     QTranslator,
+    QUrl,
 )
 from PySide6.QtGui import (
     QCloseEvent,
+    QDesktopServices,
     QFont,
     QGuiApplication,
     QIcon,
@@ -43,7 +48,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from . import core, i18n
+from . import core, i18n, updater
 from .cards import ArrowsCard, ScriptCard
 from .core import (
     APP_NAME,
@@ -96,6 +101,32 @@ class Job:
     restore: bool = False
 
 
+class Background:
+    """Fonction lancée dans un thread démon : l'application peut se fermer sans l'attendre.
+
+    Function run in a daemon thread: the app can close without waiting for it.
+    """
+
+    def __init__(self, function: Callable[[], object]) -> None:
+        self.result: object = None
+        self.error = ""
+        self.done = False
+        self._function = function
+        threading.Thread(target=self._run, daemon=True).start()
+
+    def _run(self) -> None:
+        try:
+            self.result = self._function()
+        except updater.UpdateError as exc:
+            self.error = str(exc)
+        except Exception as exc:
+            # Tout autre échec est montré à l'utilisateur au lieu de bloquer l'interface.
+            # Any other failure is shown to the user instead of blocking the interface.
+            log.exception(tr("Tâche de fond en échec"))
+            self.error = str(exc) or type(exc).__name__
+        self.done = True
+
+
 class MainWindow(QWidget):
     PANE_OPEN, PANE_COMPACT = 288, 56
 
@@ -112,6 +143,7 @@ class MainWindow(QWidget):
         self.settings = settings
         self.settings_path = settings_path
         self.app_dir = app_dir
+        self.data_dir = data_dir
         self.scripts_dir = core.scripts_dir(app_dir)
         self.admin = core.is_admin()
         # Windows 11 : fond de fenêtre transparent, Windows dessine Mica ou Acrylic derrière.
@@ -186,6 +218,7 @@ class MainWindow(QWidget):
             core.RESTORE_CLEANUP in self.scripts_page.script_cards,
             settings.transparency,
             settings.language,
+            settings.update_check,
         )
         self.settings_page.mode_changed.connect(self.set_mode)
         self.settings_page.accent_changed.connect(self.set_accent)
@@ -206,6 +239,18 @@ class MainWindow(QWidget):
         self.settings_page.restore_auto_changed.connect(self.set_restore_auto)
         self.settings_page.restore_now_requested.connect(lambda: self._start_restore(None, None))
         self.settings_page.restore_cleanup_requested.connect(self.clean_restore_points)
+        self.settings_page.update_check_changed.connect(self.set_update_check)
+        self.settings_page.update_check_requested.connect(lambda: self.check_updates(manual=True))
+        self.settings_page.update_install_requested.connect(self.install_update)
+        # Mises à jour : une tâche de fond à la fois, suivie par une minuterie.
+        # Updates: one background task at a time, followed by a timer.
+        self.release: updater.Release | None = None
+        self._task: tuple[Background, Callable[[object, str], None]] | None = None
+        self._task_timer = QTimer(self)
+        self._task_timer.setInterval(150)
+        self._task_timer.timeout.connect(self._poll_task)
+        if settings.update_check and IS_WINDOWS:
+            QTimer.singleShot(2500, self.check_updates)
         for page in (self.scripts_page, self.journal_page, self.settings_page):
             self.stack.addWidget(page)
         layer_layout.addWidget(self.stack)
@@ -421,6 +466,134 @@ class MainWindow(QWidget):
     def set_restore_auto(self, enabled: bool) -> None:
         self.settings.restore_point = enabled
         self._save()
+
+    # -- mises à jour / updates -------------------------------------------------------
+
+    def set_update_check(self, enabled: bool) -> None:
+        self.settings.update_check = enabled
+        self._save()
+
+    def _run_background(self, function: Callable[[], object], done: Callable[[object, str], None]) -> None:
+        self._task = (Background(function), done)
+        self._task_timer.start()
+
+    def _poll_task(self) -> None:
+        if self._task is None or not self._task[0].done:
+            return
+        task, done = self._task
+        self._task = None
+        self._task_timer.stop()
+        done(task.result, task.error)
+
+    def check_updates(self, manual: bool = False) -> None:
+        if self._task is not None:
+            return
+        self.settings_page.set_update_status(tr("Recherche d’une nouvelle version…"), busy=True)
+        self._run_background(
+            updater.fetch_latest, lambda result, error: self._update_checked(result, error, manual)
+        )
+
+    def installable(self, release: updater.Release) -> bool:
+        return bool(updater.can_self_update(self.app_dir) and release.zip_url and release.sha256_url)
+
+    def _update_checked(self, result: object, error: str, manual: bool) -> None:
+        if not isinstance(result, updater.Release):
+            self.settings_page.set_update_status(tr("Vérification impossible : {error}", error=error))
+            log.warning(tr("Vérification des mises à jour impossible : %s"), error)
+            if manual:
+                self.notify("caution", tr("Vérification impossible"), error)
+            return
+        if not updater.is_newer(result.version):
+            self.release = None
+            self.settings_page.set_update_status(
+                tr("Script Manager est à jour (dernière version : {version}).", version=result.version)
+            )
+            if manual:
+                self.notify("success", tr("Aucune mise à jour"), tr("Tu as déjà la dernière version."))
+            return
+        self.release = result
+        if self.installable(result):
+            text, action = tr("Version {version} disponible.", version=result.version), tr("Installer")
+        else:
+            text = tr(
+                "Version {version} disponible : télécharge-la depuis la page de la release.",
+                version=result.version,
+            )
+            action = tr("Voir la release")
+        self.settings_page.set_update_status(text, install=action)
+        self.notify(
+            "info",
+            tr("Mise à jour disponible"),
+            tr(
+                "Script Manager {version} est disponible : Paramètres › Mises à jour.",
+                version=result.version,
+            ),
+        )
+
+    def install_update(self) -> None:
+        release = self.release
+        if release is None or self._task is not None:
+            return
+        if not self.installable(release):
+            QDesktopServices.openUrl(QUrl(release.page_url))
+            return
+        if self.running:
+            self.notify(
+                "caution",
+                tr("Mise à jour reportée"),
+                tr("Attends la fin des scripts en cours, puis relance l’installation."),
+            )
+            return
+        if not updater.folder_is_writable(self.app_dir):
+            self.notify(
+                "critical",
+                tr("Dossier protégé"),
+                tr(
+                    "Script Manager ne peut pas écrire dans {folder}. Télécharge la mise à jour "
+                    "depuis la page de la release.",
+                    folder=self.app_dir,
+                ),
+            )
+            QDesktopServices.openUrl(QUrl(release.page_url))
+            return
+        answer = QMessageBox.question(
+            self,
+            tr("Installer la mise à jour"),
+            tr(
+                "Script Manager va télécharger la version {version}, se fermer, installer les "
+                "nouveaux fichiers puis redémarrer. Tes favoris et tes réglages sont conservés.",
+                version=release.version,
+            ),
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+        work = Path(tempfile.gettempdir()) / "Script-Manager-update"
+        self.settings_page.set_update_status(
+            tr("Téléchargement de la version {version}…", version=release.version),
+            busy=True,
+            install=tr("Installer"),
+        )
+        self._run_background(
+            lambda: updater.prepare(release, self.app_dir, work),
+            lambda result, error: self._update_ready(result, error, release, work),
+        )
+
+    def _update_ready(self, result: object, error: str, release: updater.Release, work: Path) -> None:
+        if not isinstance(result, Path):
+            self.settings_page.set_update_status(
+                tr("Échec de la mise à jour : {error}", error=error), install=tr("Installer")
+            )
+            self.record("Script Manager", tr("mise à jour impossible ({error})", error=error), logging.ERROR)
+            self.notify("critical", tr("Échec de la mise à jour"), error)
+            return
+        try:
+            updater.launch_apply(result, self.app_dir, work, self.data_dir / "update.log")
+        except OSError as exc:
+            self.notify("critical", tr("Échec de la mise à jour"), str(exc))
+            return
+        self.record("Script Manager", tr("mise à jour vers la version {version}", version=release.version))
+        self.close()
+        QApplication.quit()
 
     def showEvent(self, event: QShowEvent) -> None:
         super().showEvent(event)

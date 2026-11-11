@@ -599,6 +599,9 @@ class SettingsPage(QWidget):
     restore_auto_changed = Signal(bool)
     restore_now_requested = Signal()
     restore_cleanup_requested = Signal()
+    update_check_changed = Signal(bool)
+    update_check_requested = Signal()
+    update_install_requested = Signal()
 
     def __init__(
         self,
@@ -612,6 +615,7 @@ class SettingsPage(QWidget):
         cleanup_available: bool = False,
         transparency: int = 0,
         language: str = "system",
+        update_check: bool = True,
     ) -> None:
         super().__init__()
         body = QWidget()
@@ -808,6 +812,40 @@ class SettingsPage(QWidget):
             layout.addWidget(SettingsCard(icon, title, str(folder), button))
 
         layout.addSpacing(18)
+        layout.addWidget(label(tr("Mises à jour"), "strong"))
+        layout.addSpacing(6)
+        self.update_auto = ToggleSwitch()
+        self.update_auto.set_checked_silently(update_check)
+        self.update_auto.toggled.connect(self.update_check_changed.emit)
+        layout.addWidget(
+            SettingsCard(
+                "globe",
+                tr("Rechercher les mises à jour au démarrage"),
+                tr("Interroge les releases GitHub du projet à chaque lancement, sans rien installer."),
+                self.update_auto,
+            )
+        )
+        update_buttons = QWidget()
+        update_layout = QHBoxLayout(update_buttons)
+        update_layout.setContentsMargins(0, 0, 0, 0)
+        update_layout.setSpacing(8)
+        self.update_check = QPushButton(tr("Rechercher"))
+        self.update_check.clicked.connect(self.update_check_requested.emit)
+        self.update_install = QPushButton(tr("Installer"))
+        self.update_install.setProperty("accent", True)
+        self.update_install.clicked.connect(self.update_install_requested.emit)
+        self.update_install.hide()
+        update_layout.addWidget(self.update_check)
+        update_layout.addWidget(self.update_install)
+        self.update_card = SettingsCard(
+            "undo",
+            tr("Version {version}", version=__version__),
+            tr("Pas encore vérifié."),
+            update_buttons,
+        )
+        layout.addWidget(self.update_card)
+
+        layout.addSpacing(18)
         layout.addWidget(label(tr("À propos"), "strong"))
         layout.addSpacing(6)
         layout.addWidget(
@@ -821,6 +859,17 @@ class SettingsPage(QWidget):
             )
         )
         layout.addStretch(1)
+
+    def set_update_status(self, text: str, busy: bool = False, install: str = "") -> None:
+        """Texte de la carte des mises à jour ; ``install`` : libellé du bouton d'action, vide = masqué.
+
+        Update card text; ``install``: action button label, empty = hidden.
+        """
+        self.update_card.description.setText(text)
+        self.update_check.setEnabled(not busy)
+        self.update_install.setEnabled(not busy)
+        self.update_install.setText(install)
+        self.update_install.setVisible(bool(install))
 
     def _show_transparency(self, value: int) -> None:
         self.transparency_value.setText(tr("{value} %", value=value))

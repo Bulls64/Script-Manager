@@ -494,3 +494,69 @@ def test_exposed_scripts_folder_is_reported(
     favorites_window(qapp, tmp_path)
     qapp.processEvents()
     assert any(severity == "caution" and "lecteur amovible" in text for severity, text in shown)
+
+
+def wait_for_task(qapp: Any, window: MainWindow) -> None:
+    import time
+
+    deadline = time.monotonic() + 5
+    while window._task is not None and time.monotonic() < deadline:
+        qapp.processEvents()
+        time.sleep(0.02)
+    assert window._task is None
+
+
+@pytest.mark.parametrize(
+    ("latest", "installable", "expected_button"),
+    [("99.0.0", True, "Installer"), ("99.0.0", False, "Voir la release"), (None, False, "")],
+)
+def test_update_check_shows_the_result(
+    qapp: Any,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    latest: str | None,
+    installable: bool,
+    expected_button: str,
+) -> None:
+    from scripts_windows import __version__, updater
+
+    version = latest or __version__
+    release = updater.Release(version, updater.RELEASES_PAGE, "https://x/a.zip", "https://x/a.zip.sha256")
+    monkeypatch.setattr(updater, "fetch_latest", lambda: release)
+    monkeypatch.setattr(updater, "can_self_update", lambda _dir: installable)
+    shown: list[str] = []
+    monkeypatch.setattr(
+        MainWindow, "notify", lambda _self, severity, _title, _message: shown.append(severity)
+    )
+    window = favorites_window(qapp, tmp_path)
+    window.check_updates(manual=True)
+    assert not window.settings_page.update_check.isEnabled()
+    wait_for_task(qapp, window)
+    page = window.settings_page
+    assert page.update_check.isEnabled()
+    assert page.update_install.isVisibleTo(page) == bool(expected_button)
+    assert page.update_install.text() == expected_button
+    # La dernière notification ; la précédente est l'avertissement « Windows requis » hors Windows.
+    # The last notification; the one before is the "Windows required" notice outside Windows.
+    assert shown[-1] == ("info" if latest else "success")
+    assert (window.release is not None) == bool(latest)
+
+
+def test_update_check_failure_is_reported(qapp: Any, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    from scripts_windows import updater
+
+    def fail() -> updater.Release:
+        raise updater.UpdateError("GitHub injoignable")
+
+    monkeypatch.setattr(updater, "fetch_latest", fail)
+    window = favorites_window(qapp, tmp_path)
+    window.check_updates(manual=False)
+    wait_for_task(qapp, window)
+    assert "GitHub injoignable" in window.settings_page.update_card.description.text()
+    assert not window.info_host.isVisibleTo(window) or "GitHub" not in window.info._message.text()
+
+
+def test_update_toggle_is_saved(qapp: Any, tmp_path: Path) -> None:
+    window = favorites_window(qapp, tmp_path)
+    window.settings_page.update_auto.click()
+    assert core.load_settings(tmp_path / "s.json").update_check is False

@@ -2,6 +2,10 @@
 
 All notable changes to Script Manager. Versions before 2.17.0 were not published.
 
+## 2.18.0
+
+- Updates from GitHub releases: Settings › Updates, with an automatic check at startup (can be turned off) and a "Check now" button. "Install" downloads the release archive, checks its SHA-256 hash, then closes the app, copies the new files and starts it again. Settings, favorites and the entries added to `scripts.json` are kept. From source or a local build, the button opens the release page.
+
 ## 2.17.0 — 2026-11-11
 
 First public release.

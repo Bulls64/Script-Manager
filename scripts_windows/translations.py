@@ -257,4 +257,65 @@ EN: dict[str, str] = {
     "programmes peuvent les modifier. Range Script Manager dans un dossier à toi, "
     "sur un disque interne.": "Administrator scripts are run from {folder}, but {reason}: other programs "
     "can change them. Move Script Manager to a folder of your own, on an internal drive.",
+    "Version {version} disponible : télécharge-la depuis la page de la release.": (
+        "Version {version} is available: download it from the release page."
+    ),
+    "Dossier protégé": "Protected folder",
+    "Installer": "Install",
+    "Échec de la mise à jour": "Update failed",
+    "Mises à jour": "Updates",
+    "Archive trop volumineuse.": "Archive too large.",
+    "Impossible de joindre GitHub ({error}).": "Cannot reach GitHub ({error}).",
+    "Vérification impossible : {error}": "Check failed: {error}",
+    "Mise à jour reportée": "Update postponed",
+    "Mise à jour disponible": "Update available",
+    "Vérification impossible": "Check failed",
+    "Archive incomplète : {name} ou {manifest} manque.": (
+        "Incomplete archive: {name} or {manifest} is missing."
+    ),
+    "Échec de la mise à jour : {error}": "Update failed: {error}",
+    "Téléchargement de la version {version}…": "Downloading version {version}…",
+    "Aucune mise à jour": "No update",
+    "Téléchargement impossible ({error}).": "Download failed ({error}).",
+    "Script Manager {version} est disponible : Paramètres › Mises à jour.": (
+        "Script Manager {version} is available: Settings › Updates."
+    ),
+    "Version {version}": "Version {version}",
+    "Version {version} disponible.": "Version {version} is available.",
+    "Attends la fin des scripts en cours, puis relance l’installation.": (
+        "Wait for the running scripts to finish, then start the installation again."
+    ),
+    "Script Manager est à jour (dernière version : {version}).": (
+        "Script Manager is up to date (latest version: {version})."
+    ),
+    "Rechercher": "Check now",
+    "Réponse de GitHub inattendue.": "Unexpected answer from GitHub.",
+    "mise à jour vers la version {version}": "updating to version {version}",
+    "Pas encore vérifié.": "Not checked yet.",
+    "Vérification des mises à jour impossible : %s": "Update check failed: %s",
+    "Interroge les releases GitHub du projet à chaque lancement, sans rien installer.": (
+        "Checks the project’s GitHub releases at every start, without installing anything."
+    ),
+    "mise à jour impossible ({error})": "update failed ({error})",
+    "Adresse de téléchargement refusée : {url}": "Download address refused: {url}",
+    "Voir la release": "Open the release",
+    "Installer la mise à jour": "Install the update",
+    "Tâche de fond en échec": "Background task failed",
+    "Empreinte SHA-256 incorrecte : l’archive n’est pas installée.": (
+        "Wrong SHA-256 hash: the archive is not installed."
+    ),
+    "Script Manager ne peut pas écrire dans {folder}. Télécharge la mise à jour depuis la "
+    "page de la release.": (
+        "Script Manager cannot write to {folder}. Download the update from the release page."
+    ),
+    "Rechercher les mises à jour au démarrage": "Check for updates at startup",
+    "Cette release ne contient pas d’archive à installer.": "This release has no archive to install.",
+    "Script Manager va télécharger la version {version}, se fermer, installer les nouveaux "
+    "fichiers puis redémarrer. Tes favoris et tes réglages sont conservés.": (
+        "Script Manager will download version {version}, close, install the new files and start "
+        "again. Your favorites and settings are kept."
+    ),
+    "Recherche d’une nouvelle version…": "Looking for a new version…",
+    "Archive refusée : chemin invalide ({name}).": "Archive refused: invalid path ({name}).",
+    "Tu as déjà la dernière version.": "You already have the latest version.",
 }
