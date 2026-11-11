@@ -1,0 +1,134 @@
+{
+  "scripts": [
+    {
+      "title": "Raccourcis Arrêter et Redémarrer",
+      "title_en": "Shut down and Restart shortcuts",
+      "filename": "Creer-raccourcis-Arreter-Redemarrer.bat",
+      "description": "Crée trois raccourcis sur le Bureau. Arrêter et Redémarrer laissent 10 secondes, pendant lesquelles « Annuler l’arrêt » annule l’opération.",
+      "description_en": "Creates three desktop shortcuts. Shut down and Restart wait 10 seconds, during which “Annuler l’arrêt” (cancel shutdown) stops them.",
+      "category": "bureau",
+      "icon": "power"
+    },
+    {
+      "title": "Raccourci Bureau",
+      "title_en": "Desktop shortcut",
+      "filename": "Creer-raccourci-Bureau.bat",
+      "description": "Crée un raccourci qui ouvre le dossier Bureau dans l’Explorateur, puis ouvre ce dossier pour l’épingler à la barre des tâches.",
+      "description_en": "Creates a shortcut that opens the Desktop folder in File Explorer, then opens that folder so you can pin it to the taskbar.",
+      "category": "bureau",
+      "icon": "desktop"
+    },
+    {
+      "title": "Raccourci Fermer toutes les fenêtres",
+      "title_en": "Close all windows shortcut",
+      "filename": "Creer-raccourci-Fermer-fenetres.bat",
+      "description": "Crée un raccourci sur le Bureau qui ferme toutes les fenêtres ouvertes, comme un clic sur la croix : une application qui a un travail non enregistré le demande d’abord.",
+      "description_en": "Creates a desktop shortcut that closes every open window, like clicking the X: an app with unsaved work asks first.",
+      "category": "bureau",
+      "icon": "window"
+    },
+    {
+      "title": "Créer le dossier God Mode",
+      "title_en": "Create the God Mode folder",
+      "filename": "Creer-dossier-GodMode.bat",
+      "description": "Ajoute le dossier God Mode au vrai Bureau de l’utilisateur, y compris lorsqu’il est redirigé vers OneDrive.",
+      "description_en": "Adds the God Mode folder to the user’s real desktop, including when it is redirected to OneDrive.",
+      "category": "bureau",
+      "icon": "sparkle"
+    },
+    {
+      "title": "Retirer les éléments ajoutés au Bureau",
+      "title_en": "Remove items added to the desktop",
+      "filename": "Retirer-elements-Bureau.bat",
+      "description": "Liste les raccourcis et le dossier God Mode créés par ces scripts, demande confirmation, puis les retire. Les éléments modifiés à la main sont laissés en place.",
+      "description_en": "Lists the shortcuts and God Mode folder created by these scripts, asks for confirmation, then removes them. Items changed by hand are left in place.",
+      "category": "bureau",
+      "icon": "undo"
+    },
+    {
+      "title": "Supprimer les flèches des raccourcis",
+      "title_en": "Remove shortcut arrows",
+      "filename": "Supprimer-fleche-raccourci.bat",
+      "description": "Utilise l’icône transparente fournie (NoArrow.ico), modifie le Registre pour tous les utilisateurs, puis propose de redémarrer l’Explorateur. L’état d’origine est enregistré avant la première modification.",
+      "description_en": "Uses the bundled transparent icon (NoArrow.ico), changes the Registry for all users, then offers to restart File Explorer. The original state is saved before the first change.",
+      "admin": true,
+      "registry": true,
+      "category": "registre",
+      "icon": "key"
+    },
+    {
+      "title": "Restaurer les flèches des raccourcis",
+      "title_en": "Restore shortcut arrows",
+      "filename": "Restaurer-fleche-raccourci.bat",
+      "description": "Annule la suppression des flèches : remet le Registre dans son état d’origine, puis propose de redémarrer l’Explorateur.",
+      "description_en": "Undoes the arrow removal: puts the Registry back in its original state, then offers to restart File Explorer.",
+      "admin": true,
+      "registry": true,
+      "category": "registre",
+      "icon": "key"
+    },
+    {
+      "title": "Réduire les délais d’animation",
+      "title_en": "Shorten animation delays",
+      "filename": "Reduire-animations.bat",
+      "description": "Ramène à 200 ms au plus les délais avant l’ouverture des sous-menus, des info-bulles et des aperçus de la barre des tâches. Les délais déjà plus courts restent tels quels ; l’état d’origine est enregistré.",
+      "description_en": "Caps at 200 ms the delays before submenus, tooltips and taskbar previews appear. Delays that are already shorter stay as they are; the original state is saved.",
+      "registry": true,
+      "category": "registre",
+      "icon": "settings"
+    },
+    {
+      "title": "Restaurer les délais d’animation",
+      "title_en": "Restore animation delays",
+      "filename": "Restaurer-animations.bat",
+      "description": "Remet les délais d’affichage enregistrés par « Réduire les délais d’animation ».",
+      "description_en": "Puts back the display delays saved by “Shorten animation delays”.",
+      "registry": true,
+      "category": "registre",
+      "icon": "undo"
+    },
+    {
+      "title": "Nettoyer les points de restauration",
+      "title_en": "Clean up restore points",
+      "filename": "Supprimer-anciens-points-restauration.bat",
+      "description": "Supprime tous les points de restauration système sauf le plus récent, pour libérer de l’espace disque. Liste les points et demande confirmation avant de supprimer.",
+      "description_en": "Deletes all system restore points except the most recent, to free up disk space. Lists the points and asks for confirmation before deleting.",
+      "admin": true,
+      "category": "systeme",
+      "icon": "delete",
+      "restore_point": false
+    },
+    {
+      "title": "Supprimer les fichiers temporaires",
+      "title_en": "Delete temporary files",
+      "filename": "Supprimer-fichiers-temporaires.bat",
+      "description": "Vide le dossier Temp de chaque compte du PC et celui de Windows, après affichage des tailles et confirmation. Les fichiers en cours d’utilisation sont laissés en place.",
+      "description_en": "Empties the Temp folder of every account on the PC and the Windows one, after showing the sizes and asking for confirmation. Files in use are left in place.",
+      "admin": true,
+      "category": "systeme",
+      "icon": "delete",
+      "restore_point": false
+    },
+    {
+      "title": "Lancer Super God Mode",
+      "title_en": "Run Super God Mode",
+      "filename": "Lancer-Super-God-Mode.bat",
+      "description": "Télécharge le script officiel depuis GitHub, puis ouvre son interface. La copie gardée dans le dossier des scripts est mise à jour quand elle a plus de 7 jours.",
+      "description_en": "Downloads the official script from GitHub, then opens its interface. The copy kept in the scripts folder is refreshed when it is more than 7 days old.",
+      "internet": true,
+      "category": "en_ligne",
+      "icon": "grid"
+    },
+    {
+      "title": "Lancer WinUtil (Chris Titus Tech)",
+      "title_en": "Run WinUtil (Chris Titus Tech)",
+      "filename": "Lancer-WinUtil.bat",
+      "description": "Télécharge WinUtil depuis sa release GitHub officielle, vérifie sa signature, puis l’ouvre en administrateur. Sans signature valide, une confirmation est demandée.",
+      "description_en": "Downloads WinUtil from its official GitHub release, checks its signature, then opens it as administrator. Without a valid signature, you are asked to confirm.",
+      "admin": true,
+      "internet": true,
+      "category": "en_ligne",
+      "icon": "toolbox"
+    }
+  ]
+}

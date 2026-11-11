@@ -1,0 +1,29 @@
+root = true
+
+[*]
+charset = utf-8
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# cmd.exe lit mal les .bat en fins de ligne LF (goto, étiquettes) : CRLF obligatoire.
+# Partie batch en ASCII pur (page de code OEM) ; la partie PowerShell après #PS1# est en UTF-8.
+# cmd.exe misreads LF .bat files (goto, labels): CRLF is required.
+# Batch part in plain ASCII (OEM code page); the PowerShell part after #PS1# is UTF-8.
+[*.{bat,cmd}]
+end_of_line = crlf
+
+# Windows PowerShell 5.1 ne lit l'UTF-8 correctement qu'avec un BOM.
+[*.ps1]
+end_of_line = crlf
+charset = utf-8-bom
+
+[*.txt]
+end_of_line = crlf
+
+[*.{py,pyw,spec,json,md,toml}]
+end_of_line = lf
+indent_style = space
+indent_size = 4
+
+[*.{json,md}]
+indent_size = 2

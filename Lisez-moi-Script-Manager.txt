@@ -1,0 +1,43 @@
+SCRIPT MANAGER
+https://github.com/Bulls64/Script-Manager
+
+English
+-------
+Run Script-Manager.exe. Keep scripts.json and the scripts folder next to it:
+the app reads them at startup. Put this folder somewhere of your own on an
+internal drive (not Downloads, not a USB stick): administrator scripts are run
+from the scripts folder.
+
+Windows SmartScreen may warn the first time, because the EXE is not signed:
+click "More info", then "Run anyway".
+
+Undo:
+- Restaurer-fleche-raccourci.bat puts the shortcut arrows back.
+- Restaurer-animations.bat puts the display delays back.
+- Retirer-elements-Bureau.bat removes the shortcuts and the God Mode folder
+  created by these scripts.
+
+Your own scripts: drop .bat or .cmd files in the scripts folder, then
+"Add a favorite". Full documentation: README.md.
+
+Français
+--------
+Lance Script-Manager.exe. Garde scripts.json et le dossier scripts à côté :
+l'application les lit au démarrage. Range ce dossier dans un dossier à toi, sur
+un disque interne (pas dans Téléchargements ni sur une clé USB) : les scripts
+administrateur sont lancés depuis le dossier scripts.
+
+SmartScreen peut avertir au premier lancement, car l'EXE n'est pas signé :
+clique sur « Informations complémentaires », puis « Exécuter quand même ».
+
+Annulations :
+- Restaurer-fleche-raccourci.bat remet les flèches des raccourcis.
+- Restaurer-animations.bat remet les délais d'affichage.
+- Retirer-elements-Bureau.bat retire les raccourcis et le dossier God Mode
+  créés par ces scripts.
+
+Tes propres scripts : dépose des .bat ou .cmd dans le dossier scripts, puis
+« Ajouter un favori ». Documentation complète : README.md.
+
+License / Licence : MIT. WinUtil (MIT) and Super God Mode (GPL-3.0) are
+downloaded at run time and keep their own licenses.

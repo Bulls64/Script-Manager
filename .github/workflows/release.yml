@@ -1,0 +1,54 @@
+# Pousser un tag vX.Y.Z construit l'EXE sous Windows et publie l'archive dans une release GitHub.
+# L'archive contient le dossier de l'EXE, scripts.json et le dossier scripts : l'application
+# trouve scripts.json à côté de l'EXE.
+# Pushing a vX.Y.Z tag builds the EXE on Windows and publishes the archive in a GitHub release.
+# The archive holds the EXE folder, scripts.json and the scripts folder: the app finds
+# scripts.json next to the EXE.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check the tag matches the app version
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}".TrimStart("v")
+          $version = python -c "import scripts_windows; print(scripts_windows.__version__)"
+          if ($tag -ne $version) { throw "Tag $tag does not match __version__ $version" }
+
+      - name: Build
+        run: |
+          python -m pip install --disable-pip-version-check -r requirements-build.txt
+          python -m PyInstaller --noconfirm --clean Script-Manager.spec
+
+      - name: Package
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart("v")
+          $app = "dist\Script-Manager"
+          Copy-Item scripts.json, LICENSE, README.md, Lisez-moi-Script-Manager.txt -Destination $app
+          Copy-Item scripts -Destination "$app\scripts" -Recurse
+          $zip = "Script-Manager-$version.zip"
+          Compress-Archive -Path $app -DestinationPath $zip
+          $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower()
+          "$hash  $zip" | Out-File -Encoding ascii "$zip.sha256"
+          "ZIP=$zip" >> $env:GITHUB_ENV
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" "$env:ZIP" "$env:ZIP.sha256" --title "Script Manager ${{ github.ref_name }}" --generate-notes

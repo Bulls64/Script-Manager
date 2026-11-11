@@ -1,0 +1,33 @@
+name: Bug report / Signaler un bug
+description: Something does not work as expected / Quelque chose ne fonctionne pas comme prévu
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Script Manager version / Version
+      description: Settings page, or the release you downloaded / Page Paramètres, ou la release téléchargée
+      placeholder: "2.17.0"
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version / Version de Windows
+      description: "Run `winver` / Lance `winver`"
+      placeholder: "Windows 11 24H2 (26100)"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: What happened / Ce qui s’est passé
+      description: Steps, what you expected, what you got / Étapes, résultat attendu, résultat obtenu
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Log / Journal
+      description: Relevant lines of %LOCALAPPDATA%\Scripts-Windows\launcher.log / Lignes utiles du journal
+      render: text

@@ -1,0 +1,25 @@
+# Build
+dist/
+build/
+.venv-build/
+*.exe
+__pycache__/
+*.pyc
+
+# Fichiers créés à l'exécution par les scripts
+Super_God_Mode.ps1
+Super_God_Mode.ps1.tmp
+ShellIcons-before-NoArrow.reg
+ShellIcons-before-NoArrow.state
+
+# Outils
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Éditeurs et système
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini

@@ -1,0 +1,13 @@
+# Fins de ligne fixées par le dépôt, quel que soit le réglage core.autocrlf du clone.
+# Line endings set by the repository, whatever the clone's core.autocrlf setting.
+* text=auto eol=lf
+
+# cmd.exe lit mal les .bat en LF (goto, étiquettes) : CRLF obligatoire.
+# cmd.exe misreads LF .bat files (goto, labels): CRLF is required.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+*.txt text eol=crlf
+
+*.ico binary
+*.png binary
