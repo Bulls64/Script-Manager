@@ -69,7 +69,10 @@ def test_theme_and_accent_are_saved(qapp: Any, tmp_path: Path) -> None:
     window = build(qapp, tmp_path)
     window.quick_toggle_theme()
     window.set_accent("#107C10")
-    assert core.load_settings(tmp_path / "s.json") == core.Settings(theme="dark", accent="#107C10")
+    from scripts_windows import __version__
+
+    expected = core.Settings(theme="dark", accent="#107C10", seen_version=__version__)
+    assert core.load_settings(tmp_path / "s.json") == expected
     assert window.settings_page.combo.currentData() == "dark"
 
 

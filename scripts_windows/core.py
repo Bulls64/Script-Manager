@@ -386,6 +386,10 @@ class Settings:
     # Recherche d'une nouvelle version sur GitHub au démarrage.
     # Check GitHub for a new version at startup.
     update_check: bool = True
+    # Fenêtre des nouveautés au premier lancement d'une nouvelle version, et dernière version vue.
+    # What's new window on the first run of a new version, and last version seen.
+    whats_new: bool = True
+    seen_version: str = ""
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Settings:
@@ -402,9 +406,12 @@ class Settings:
         transparency = data.get("transparency")
         if isinstance(transparency, int) and not isinstance(transparency, bool):
             settings.transparency = min(max(transparency, 0), TRANSPARENCY_MAX)
-        for key in ("restore_point", "update_check"):
+        for key in ("restore_point", "update_check", "whats_new"):
             if isinstance(data.get(key), bool):
                 setattr(settings, key, data[key])
+        seen_version = data.get("seen_version")
+        if isinstance(seen_version, str) and re.fullmatch(r"\d+(\.\d+){0,3}", seen_version):
+            settings.seen_version = seen_version
         favorites = data.get("favorites")
         if isinstance(favorites, list):
             seen: set[str] = set()
@@ -424,6 +431,8 @@ class Settings:
             "restore_point": self.restore_point,
             "favorites": list(self.favorites),
             "update_check": self.update_check,
+            "whats_new": self.whats_new,
+            "seen_version": self.seen_version,
         }
 
 

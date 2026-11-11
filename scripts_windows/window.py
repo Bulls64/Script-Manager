@@ -48,7 +48,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from . import core, i18n, updater
+from . import __version__, core, i18n, updater, whatsnew
 from .cards import ArrowsCard, ScriptCard
 from .core import (
     APP_NAME,
@@ -219,6 +219,7 @@ class MainWindow(QWidget):
             settings.transparency,
             settings.language,
             settings.update_check,
+            settings.whats_new,
         )
         self.settings_page.mode_changed.connect(self.set_mode)
         self.settings_page.accent_changed.connect(self.set_accent)
@@ -242,6 +243,9 @@ class MainWindow(QWidget):
         self.settings_page.update_check_changed.connect(self.set_update_check)
         self.settings_page.update_check_requested.connect(lambda: self.check_updates(manual=True))
         self.settings_page.update_install_requested.connect(self.install_update)
+        self.settings_page.whats_new_changed.connect(self.set_whats_new)
+        self.settings_page.whats_new_requested.connect(self.show_whats_new)
+        self.whats_new_dialog: whatsnew.WhatsNewDialog | None = None
         # Mises à jour : une tâche de fond à la fois, suivie par une minuterie.
         # Updates: one background task at a time, followed by a timer.
         self.release: updater.Release | None = None
@@ -251,6 +255,13 @@ class MainWindow(QWidget):
         self._task_timer.timeout.connect(self._poll_task)
         if settings.update_check and IS_WINDOWS:
             QTimer.singleShot(2500, self.check_updates)
+        if whatsnew.should_show(settings):
+            QTimer.singleShot(700, self.show_whats_new)
+        if settings.seen_version != __version__:
+            # Vue une seule fois, même si la fenêtre est désactivée ou fermée avant.
+            # Seen only once, even if the window is disabled or closed before.
+            settings.seen_version = __version__
+            self._save()
         for page in (self.scripts_page, self.journal_page, self.settings_page):
             self.stack.addWidget(page)
         layer_layout.addWidget(self.stack)
@@ -468,6 +479,26 @@ class MainWindow(QWidget):
         self._save()
 
     # -- mises à jour / updates -------------------------------------------------------
+
+    def set_whats_new(self, enabled: bool) -> None:
+        self.settings.whats_new = enabled
+        self._save()
+
+    def show_whats_new(self) -> None:
+        """Fenêtre des nouveautés, non bloquante (une seule à la fois).
+
+        What's new window, non-blocking (only one at a time).
+        """
+        if self.whats_new_dialog is not None and self.whats_new_dialog.isVisible():
+            self.whats_new_dialog.raise_()
+            return
+        self.whats_new_dialog = whatsnew.WhatsNewDialog(self)
+        self.whats_new_dialog.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
+        self.whats_new_dialog.finished.connect(self._whats_new_closed)
+        self.whats_new_dialog.open()
+
+    def _whats_new_closed(self) -> None:
+        self.whats_new_dialog = None
 
     def set_update_check(self, enabled: bool) -> None:
         self.settings.update_check = enabled

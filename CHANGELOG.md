@@ -2,6 +2,10 @@
 
 All notable changes to Script Manager. Versions before 2.17.0 were not published.
 
+## 2.19.0
+
+- "What's new in v…" window: it opens the first time a new version starts and lists the changes of that version. It can be opened again from Settings › Updates › What's new, and its automatic display can be turned off there ("Show what's new after an update").
+
 ## 2.18.0
 
 - Updates from GitHub releases: Settings › Updates, with an automatic check at startup (can be turned off) and a "Check now" button. "Install" downloads the release archive, checks its SHA-256 hash, then closes the app, copies the new files and starts it again. Settings, favorites and the entries added to `scripts.json` are kept. From source or a local build, the button opens the release page.

@@ -602,6 +602,8 @@ class SettingsPage(QWidget):
     update_check_changed = Signal(bool)
     update_check_requested = Signal()
     update_install_requested = Signal()
+    whats_new_changed = Signal(bool)
+    whats_new_requested = Signal()
 
     def __init__(
         self,
@@ -616,6 +618,7 @@ class SettingsPage(QWidget):
         transparency: int = 0,
         language: str = "system",
         update_check: bool = True,
+        whats_new: bool = True,
     ) -> None:
         super().__init__()
         body = QWidget()
@@ -844,6 +847,29 @@ class SettingsPage(QWidget):
             update_buttons,
         )
         layout.addWidget(self.update_card)
+        news_controls = QWidget()
+        news_layout = QHBoxLayout(news_controls)
+        news_layout.setContentsMargins(0, 0, 0, 0)
+        news_layout.setSpacing(12)
+        news_button = QPushButton(tr("Nouveautés"))
+        news_button.setToolTip(tr("Nouveautés de la v{version}", version=__version__))
+        news_button.clicked.connect(self.whats_new_requested.emit)
+        self.whats_new_auto = ToggleSwitch()
+        self.whats_new_auto.set_checked_silently(whats_new)
+        self.whats_new_auto.toggled.connect(self.whats_new_changed.emit)
+        news_layout.addWidget(news_button)
+        news_layout.addWidget(self.whats_new_auto)
+        layout.addWidget(
+            SettingsCard(
+                "info",
+                tr("Afficher les nouveautés après une mise à jour"),
+                tr(
+                    "Ouvre la liste des nouveautés au premier lancement d’une nouvelle version. "
+                    "« Nouveautés » la rouvre à tout moment."
+                ),
+                news_controls,
+            )
+        )
 
         layout.addSpacing(18)
         layout.addWidget(label(tr("À propos"), "strong"))

@@ -56,6 +56,8 @@ Settings › Updates › "Check for updates at startup" (on by default) asks Git
 
 Your settings, your favorite scripts and the entries you added to `scripts.json` are kept; the built-in scripts are replaced by the new ones. Installing in place only works for the EXE extracted from a release, in a folder you can write to. When running from source or from a local build, the button opens the release page instead (`git pull` updates a clone).
 
+The first time a new version starts, a **What's new in v…** window lists its changes. Settings › Updates › **What's new** opens it again; the switch next to it turns off the automatic display.
+
 ## Included scripts
 
 | Script | What it does | Undo |
@@ -207,6 +209,8 @@ Paramètres › Mises à jour › « Rechercher les mises à jour au démarrage 
 2. se ferme, copie les nouveaux fichiers par-dessus les anciens et redémarre (le journal de cette étape est `%LOCALAPPDATA%\Scripts-Windows\update.log`).
 
 Tes réglages, tes scripts en favori et les entrées que tu as ajoutées à `scripts.json` sont conservés ; les scripts intégrés sont remplacés par les nouveaux. L’installation sur place ne fonctionne que pour l’EXE décompressé d’une release, dans un dossier où tu peux écrire. Depuis les sources ou un build local, le bouton ouvre la page de la release (`git pull` met un clone à jour).
+
+Au premier lancement d’une nouvelle version, une fenêtre **Nouveautés de la v…** liste ce qui a changé. Paramètres › Mises à jour › **Nouveautés** la rouvre ; l’interrupteur à côté désactive l’affichage automatique.
 
 ## Scripts inclus
 

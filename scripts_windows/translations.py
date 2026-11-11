@@ -318,4 +318,50 @@ EN: dict[str, str] = {
     "Recherche d’une nouvelle version…": "Looking for a new version…",
     "Archive refusée : chemin invalide ({name}).": "Archive refused: invalid path ({name}).",
     "Tu as déjà la dernière version.": "You already have the latest version.",
+    "Nouveautés": "What's new",
+    "Nouveautés de la v{version}": "What's new in v{version}",
+    "Ce qui a changé dans cette version de Script Manager.": (
+        "What changed in this version of Script Manager."
+    ),
+    "Aucune nouveauté listée pour cette version.": "No changes listed for this version.",
+    "Historique complet : CHANGELOG.md sur GitHub.": "Full history: CHANGELOG.md on GitHub.",
+    "Afficher les nouveautés après une mise à jour": "Show what's new after an update",
+    (
+        "Ouvre la liste des nouveautés au premier lancement d’une nouvelle version. "
+        "« Nouveautés » la rouvre à tout moment."
+    ): (
+        "Opens the list of changes the first time a new version starts. "
+        '"What\'s new" opens it again at any time.'
+    ),
+    (
+        "Fenêtre « Nouveautés » : elle s’affiche au premier lancement d’une nouvelle version "
+        "et liste ce qui a changé."
+    ): '"What\'s new" window: it opens the first time a new version starts and lists what changed.',
+    "Elle peut être rouverte à tout moment depuis Paramètres › Mises à jour › Nouveautés.": (
+        "It can be opened again at any time from Settings › Updates › What's new."
+    ),
+    (
+        "Son affichage automatique se désactive dans Paramètres › Mises à jour, avec "
+        "« Afficher les nouveautés après une mise à jour »."
+    ): (
+        "Its automatic display can be turned off in Settings › Updates, with "
+        '"Show what\'s new after an update".'
+    ),
+    (
+        "Mises à jour depuis les releases GitHub : recherche automatique au démarrage "
+        "(désactivable) et bouton « Rechercher » dans Paramètres › Mises à jour."
+    ): (
+        "Updates from GitHub releases: automatic check at startup (can be turned off) "
+        'and a "Check now" button in Settings › Updates.'
+    ),
+    (
+        "« Installer » télécharge l’archive, vérifie son empreinte SHA-256, puis ferme l’appli, "
+        "copie les nouveaux fichiers et la relance."
+    ): (
+        '"Install" downloads the archive, checks its SHA-256 hash, then closes the app, '
+        "copies the new files and starts it again."
+    ),
+    "Réglages, favoris et scripts ajoutés à scripts.json sont conservés.": (
+        "Settings, favorites and scripts added to scripts.json are kept."
+    ),
 }
