@@ -1,8 +1,8 @@
 # Métadonnées de l'EXE (Propriétés > Détails), lues par PyInstaller.
 VSVersionInfo(
   ffi=FixedFileInfo(
-    filevers=(2, 19, 0, 0),
-    prodvers=(2, 19, 0, 0),
+    filevers=(2, 20, 0, 0),
+    prodvers=(2, 20, 0, 0),
     mask=0x3F,
     flags=0x0,
     OS=0x40004,
@@ -15,12 +15,12 @@ VSVersionInfo(
       StringTable('040C04B0', [
         StringStruct('CompanyName', 'Bulls64'),
         StringStruct('FileDescription', 'Script Manager'),
-        StringStruct('FileVersion', '2.19.0'),
+        StringStruct('FileVersion', '2.20.0'),
         StringStruct('InternalName', 'Script-Manager'),
         StringStruct('LegalCopyright', 'Copyright (c) 2026 Bulls64. MIT License.'),
         StringStruct('OriginalFilename', 'Script-Manager.exe'),
         StringStruct('ProductName', 'Script Manager'),
-        StringStruct('ProductVersion', '2.19.0'),
+        StringStruct('ProductVersion', '2.20.0'),
       ]),
     ]),
     VarFileInfo([VarStruct('Translation', [0x040C, 1200])]),

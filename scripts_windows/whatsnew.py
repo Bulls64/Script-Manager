@@ -31,6 +31,17 @@ from .widgets import IconTile, label
 # What's new per version, most recent first. To be filled in for each version:
 # a test checks that the current version has its list.
 NOTES: dict[str, tuple[str, ...]] = {
+    "2.20.0": (
+        N_(
+            "Version ARM64 pour les PC ARM (Snapdragon, PC Copilot+) : chaque release propose "
+            "aussi une archive « -arm64 », native, à côté de l’archive x64."
+        ),
+        N_(
+            "Les mises à jour téléchargent l’archive du processeur : sur un PC ARM, la version x64 "
+            "émulée est remplacée par la version ARM64 native."
+        ),
+        N_("Paramètres › Mises à jour affiche l’architecture à côté du numéro de version."),
+    ),
     "2.19.0": (
         N_(
             "Fenêtre « Nouveautés » : elle s’affiche au premier lancement d’une nouvelle version "

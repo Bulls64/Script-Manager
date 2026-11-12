@@ -32,7 +32,7 @@ A Windows 11–style launcher for a set of Windows customization scripts: shutdo
 
 ## Download and run
 
-1. Download `Script-Manager-<version>.zip` from the [latest release](https://github.com/Bulls64/Script-Manager/releases/latest).
+1. Download the archive for your processor from the [latest release](https://github.com/Bulls64/Script-Manager/releases/latest): `Script-Manager-<version>.zip` for Intel and AMD PCs (x64), `Script-Manager-<version>-arm64.zip` for ARM PCs (Snapdragon, Copilot+ PCs). If you are not sure, Settings › System › About › System type tells you.
 2. Extract it to a folder of your own on an internal drive, for example `C:\Tools\Script-Manager` (not Downloads, not a USB stick: see [Safety](#safety)).
 3. Run `Script-Manager.exe`.
 
@@ -51,8 +51,10 @@ py -3 Script-Manager.pyw
 
 Settings › Updates › "Check for updates at startup" (on by default) asks GitHub for the [latest release](https://github.com/Bulls64/Script-Manager/releases/latest) a few seconds after startup; "Check now" does the same on demand. Nothing is downloaded until you click **Install**. The app then:
 
-1. downloads `Script-Manager-<version>.zip` and checks it against the `.sha256` file published with the release;
+1. downloads the archive for your processor (x64 or ARM64) and checks it against the `.sha256` file published with the release;
 2. closes, copies the new files over the old ones and starts again (the log of this step is `%LOCALAPPDATA%\Scripts-Windows\update.log`).
+
+On an ARM PC, the x64 version (which runs emulated) is replaced by the native ARM64 version at the next update.
 
 Your settings, your favorite scripts and the entries you added to `scripts.json` are kept; the built-in scripts are replaced by the new ones. Installing in place only works for the EXE extracted from a release, in a folder you can write to. When running from source or from a local build, the button opens the release page instead (`git pull` updates a clone).
 
@@ -186,7 +188,7 @@ Un lanceur au style de Windows 11 pour une série de scripts de personnalisation
 
 ## Télécharger et lancer
 
-1. Télécharge `Script-Manager-<version>.zip` depuis la [dernière release](https://github.com/Bulls64/Script-Manager/releases/latest).
+1. Télécharge l’archive de ton processeur depuis la [dernière release](https://github.com/Bulls64/Script-Manager/releases/latest) : `Script-Manager-<version>.zip` pour les PC Intel et AMD (x64), `Script-Manager-<version>-arm64.zip` pour les PC ARM (Snapdragon, PC Copilot+). Dans le doute, Paramètres › Système › Informations système › Type de système l’indique.
 2. Décompresse-le dans un dossier à toi, sur un disque interne, par exemple `C:\Outils\Script-Manager` (pas dans Téléchargements ni sur une clé USB : voir [Sécurité](#sécurité)).
 3. Lance `Script-Manager.exe`.
 
@@ -205,8 +207,10 @@ py -3 Script-Manager.pyw
 
 Paramètres › Mises à jour › « Rechercher les mises à jour au démarrage » (activé par défaut) interroge GitHub sur la [dernière release](https://github.com/Bulls64/Script-Manager/releases/latest) quelques secondes après le démarrage ; « Rechercher » fait la même chose à la demande. Rien n’est téléchargé tant que tu n’as pas cliqué sur **Installer**. L’application :
 
-1. télécharge `Script-Manager-<version>.zip` et le vérifie avec le fichier `.sha256` publié avec la release ;
+1. télécharge l’archive de ton processeur (x64 ou ARM64) et la vérifie avec le fichier `.sha256` publié avec la release ;
 2. se ferme, copie les nouveaux fichiers par-dessus les anciens et redémarre (le journal de cette étape est `%LOCALAPPDATA%\Scripts-Windows\update.log`).
+
+Sur un PC ARM, la version x64 (qui tourne en émulation) est remplacée par la version ARM64 native à la mise à jour suivante.
 
 Tes réglages, tes scripts en favori et les entrées que tu as ajoutées à `scripts.json` sont conservés ; les scripts intégrés sont remplacés par les nouveaux. L’installation sur place ne fonctionne que pour l’EXE décompressé d’une release, dans un dossier où tu peux écrire. Depuis les sources ou un build local, le bouton ouvre la page de la release (`git pull` met un clone à jour).
 

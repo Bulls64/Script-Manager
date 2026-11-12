@@ -20,20 +20,16 @@ from scripts_windows import __version__, core, updater
 ZIP_URL = "https://github.com/Bulls64/Script-Manager/releases/download/v9.0.0/Script-Manager-9.0.0.zip"
 
 
-def release_json(version: str = "9.0.0") -> dict[str, Any]:
+def release_json(version: str = "9.0.0", arm64: bool = False) -> dict[str, Any]:
     base = f"https://github.com/Bulls64/Script-Manager/releases/download/v{version}"
+    names = [f"Script-Manager-{version}.zip"] + ([f"Script-Manager-{version}-arm64.zip"] if arm64 else [])
     return {
         "tag_name": f"v{version}",
         "html_url": f"https://github.com/Bulls64/Script-Manager/releases/tag/v{version}",
         "assets": [
-            {
-                "name": f"Script-Manager-{version}.zip",
-                "browser_download_url": f"{base}/Script-Manager-{version}.zip",
-            },
-            {
-                "name": f"Script-Manager-{version}.zip.sha256",
-                "browser_download_url": f"{base}/Script-Manager-{version}.zip.sha256",
-            },
+            {"name": name + ext, "browser_download_url": f"{base}/{name}{ext}"}
+            for name in names
+            for ext in ("", ".sha256")
         ],
     }
 
@@ -62,6 +58,29 @@ def test_parse_release_finds_the_archive_and_its_hash() -> None:
     assert release.zip_url == ZIP_URL
     assert release.sha256_url == ZIP_URL + ".sha256"
     assert release.page_url.endswith("/tag/v9.0.0")
+
+
+def test_parse_release_picks_the_archive_of_the_processor() -> None:
+    data = release_json(arm64=True)
+    assert updater.parse_release(data, "x64").zip_url == ZIP_URL
+    assert updater.parse_release(data, "arm64").zip_url == ZIP_URL.replace(".zip", "-arm64.zip")
+    assert updater.parse_release(data, "arm64").sha256_url == ZIP_URL.replace(".zip", "-arm64.zip.sha256")
+    # Release sans archive ARM64 : la version x64 (émulée) est proposée.
+    # Release without an ARM64 archive: the (emulated) x64 version is offered.
+    assert updater.parse_release(release_json(), "arm64").zip_url == ZIP_URL
+
+
+def test_parse_release_needs_the_hash_of_the_same_archive() -> None:
+    data = release_json(arm64=True)
+    data["assets"] = [a for a in data["assets"] if a["name"] != "Script-Manager-9.0.0-arm64.zip.sha256"]
+    assert updater.parse_release(data, "arm64").zip_url == ZIP_URL
+
+
+def test_architectures() -> None:
+    assert updater.build_arch() in updater.ARCHITECTURES
+    assert updater.host_arch() in updater.ARCHITECTURES
+    assert updater.asset_name("2.20.0", "x64") == "Script-Manager-2.20.0.zip"
+    assert updater.asset_name("2.20.0", "arm64") == "Script-Manager-2.20.0-arm64.zip"
 
 
 def test_parse_release_without_assets_and_bad_answers() -> None:

@@ -35,7 +35,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from . import __version__
+from . import __version__, updater
 from .cards import ArrowsCard, ResponsiveGrid, ScriptCard
 from .core import (
     ACCENTS,
@@ -842,7 +842,7 @@ class SettingsPage(QWidget):
         update_layout.addWidget(self.update_install)
         self.update_card = SettingsCard(
             "undo",
-            tr("Version {version}", version=__version__),
+            tr("Version {version}", version=f"{__version__} · {updater.ARCH_LABELS[updater.build_arch()]}"),
             tr("Pas encore vérifié."),
             update_buttons,
         )

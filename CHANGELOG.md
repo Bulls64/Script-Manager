@@ -2,6 +2,12 @@
 
 All notable changes to Script Manager. Versions before 2.17.0 were not published.
 
+## 2.20.0
+
+- ARM64 version for ARM PCs (Snapdragon, Copilot+ PCs): each release now has `Script-Manager-<version>-arm64.zip` next to the x64 archive, built on a Windows ARM64 runner.
+- Updates download the archive for the processor. On an ARM PC, the x64 version (emulated) is replaced by the native ARM64 version at the next update; releases without an ARM64 archive still offer the x64 one.
+- Settings › Updates shows the architecture next to the version.
+
 ## 2.19.0
 
 - "What's new in v…" window: it opens the first time a new version starts and lists the changes of that version. It can be opened again from Settings › Updates › What's new, and its automatic display can be turned off there ("Show what's new after an update").

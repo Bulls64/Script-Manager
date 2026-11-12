@@ -1,34 +1,57 @@
-# Pousser un tag vX.Y.Z construit l'EXE sous Windows et publie l'archive dans une release GitHub.
-# L'archive contient le dossier de l'EXE, scripts.json et le dossier scripts : l'application
-# trouve scripts.json à côté de l'EXE.
-# Pushing a vX.Y.Z tag builds the EXE on Windows and publishes the archive in a GitHub release.
-# The archive holds the EXE folder, scripts.json and the scripts folder: the app finds
-# scripts.json next to the EXE.
+# Pousser un tag vX.Y.Z construit l'EXE sous Windows (x64 et ARM64) et publie les archives dans
+# une release GitHub. Chaque archive contient le dossier de l'EXE, scripts.json et le dossier
+# scripts : l'application trouve scripts.json à côté de l'EXE.
+# L'archive x64 garde le nom historique Script-Manager-<version>.zip (lu par les versions 2.18-2.19) ;
+# l'archive ARM64 s'appelle Script-Manager-<version>-arm64.zip.
+# Pushing a vX.Y.Z tag builds the EXE on Windows (x64 and ARM64) and publishes the archives in a
+# GitHub release. Each archive holds the EXE folder, scripts.json and the scripts folder: the app
+# finds scripts.json next to the EXE.
+# The x64 archive keeps the historical name Script-Manager-<version>.zip (read by versions 2.18-2.19);
+# the ARM64 archive is named Script-Manager-<version>-arm64.zip.
 name: Release
 
 on:
   push:
     tags: ["v*"]
+  # Lancement manuel : compile et garde les archives dans le run, sans publier de release.
+  # Manual run: builds and keeps the archives in the run, without publishing a release.
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
   build:
-    runs-on: windows-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - arch: x64
+            runner: windows-latest
+            suffix: ""
+          - arch: arm64
+            runner: windows-11-arm
+            suffix: "-arm64"
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          architecture: ${{ matrix.arch }}
 
-      - name: Check the tag matches the app version
+      - name: Check the tag and the architecture
         shell: pwsh
         run: |
-          $tag = "${{ github.ref_name }}".TrimStart("v")
           $version = python -c "import scripts_windows; print(scripts_windows.__version__)"
-          if ($tag -ne $version) { throw "Tag $tag does not match __version__ $version" }
+          if ("${{ github.ref_type }}" -eq "tag") {
+            $tag = "${{ github.ref_name }}".TrimStart("v")
+            if ($tag -ne $version) { throw "Tag $tag does not match __version__ $version" }
+          }
+          "VERSION=$version" >> $env:GITHUB_ENV
+          $arch = python -c "from scripts_windows import updater; print(updater.build_arch())"
+          if ($arch -ne "${{ matrix.arch }}") { throw "Python is $arch, expected ${{ matrix.arch }}" }
 
       - name: Build
         run: |
@@ -38,17 +61,38 @@ jobs:
       - name: Package
         shell: pwsh
         run: |
-          $version = "${{ github.ref_name }}".TrimStart("v")
+          $version = $env:VERSION
           $app = "dist\Script-Manager"
           Copy-Item scripts.json, LICENSE, README.md, Lisez-moi-Script-Manager.txt -Destination $app
           Copy-Item scripts -Destination "$app\scripts" -Recurse
-          $zip = "Script-Manager-$version.zip"
+          $zip = "Script-Manager-$version${{ matrix.suffix }}.zip"
           Compress-Archive -Path $app -DestinationPath $zip
           $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower()
           "$hash  $zip" | Out-File -Encoding ascii "$zip.sha256"
-          "ZIP=$zip" >> $env:GITHUB_ENV
+          New-Item -ItemType Directory out | Out-Null
+          Move-Item $zip, "$zip.sha256" out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.arch }}
+          path: out/*
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: out
+          merge-multiple: true
 
       - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${{ github.ref_name }}" "$env:ZIP" "$env:ZIP.sha256" --title "Script Manager ${{ github.ref_name }}" --generate-notes
+        run: |
+          ls -l out
+          gh release create "${{ github.ref_name }}" out/* --repo "${{ github.repository }}" \
+            --title "Script Manager ${{ github.ref_name }}" --generate-notes

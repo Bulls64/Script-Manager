@@ -25,6 +25,7 @@ import re
 import shutil
 import subprocess
 import sys
+import sysconfig
 import urllib.request
 import zipfile
 from dataclasses import dataclass
@@ -96,20 +97,75 @@ def _https_only(url: str) -> str:
     return url
 
 
-def parse_release(data: dict[str, Any]) -> Release:
+# Architectures publiées : x64 garde le nom d'archive historique (lu par les versions 2.18-2.19).
+# Published architectures: x64 keeps the historical archive name (read by versions 2.18-2.19).
+ARCHITECTURES = ("x64", "arm64")
+ARCH_LABELS = {"x64": "x64", "arm64": "ARM64"}
+IMAGE_FILE_MACHINE_ARM64 = 0xAA64
+
+
+def build_arch() -> str:
+    """Architecture de l'interpréteur en cours : celle de l'EXE.
+
+    Architecture of the running interpreter: the one of the EXE.
+    """
+    return "arm64" if sysconfig.get_platform().endswith("arm64") else "x64"
+
+
+def host_arch() -> str:
+    """Architecture du processeur, même quand l'appli x64 tourne en émulation sur ARM64.
+
+    Processor architecture, even when the x64 app runs emulated on ARM64.
+    """
+    if sys.platform == "win32":
+        import ctypes
+        from ctypes import wintypes
+
+        try:
+            kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+            check = kernel32.IsWow64Process2  # Windows 10 1709+
+            check.argtypes = [
+                wintypes.HANDLE,
+                ctypes.POINTER(wintypes.USHORT),
+                ctypes.POINTER(wintypes.USHORT),
+            ]
+            check.restype = wintypes.BOOL
+            process, native = wintypes.USHORT(), wintypes.USHORT()
+            if check(kernel32.GetCurrentProcess(), ctypes.byref(process), ctypes.byref(native)):
+                return "arm64" if native.value == IMAGE_FILE_MACHINE_ARM64 else "x64"
+        except (AttributeError, OSError):
+            pass
+    return build_arch()
+
+
+def asset_name(version: str, arch: str) -> str:
+    suffix = "" if arch == "x64" else f"-{arch}"
+    return f"{APP_FOLDER}-{version}{suffix}.zip"
+
+
+def parse_release(data: dict[str, Any], arch: str | None = None) -> Release:
+    """Release GitHub ; l'archive de ``arch`` (par défaut celle du processeur), sinon celle en x64.
+
+    GitHub release; the archive for ``arch`` (by default the processor one), otherwise the x64 one.
+    """
     tag = data.get("tag_name")
     if not isinstance(tag, str) or parse_version(tag) is None:
         raise UpdateError(tr("Réponse de GitHub inattendue."))
     version = tag.lstrip("v")
-    zip_url = sha_url = None
+    urls: dict[str, str] = {}
     for asset in data.get("assets") or []:
         name, url = asset.get("name"), asset.get("browser_download_url")
-        if not isinstance(name, str) or not isinstance(url, str):
-            continue
-        if name == f"{APP_FOLDER}-{version}.zip":
-            zip_url = _https_only(url)
-        elif name == f"{APP_FOLDER}-{version}.zip.sha256":
-            sha_url = _https_only(url)
+        if isinstance(name, str) and isinstance(url, str) and name.startswith(f"{APP_FOLDER}-"):
+            urls[name] = url
+    zip_url = sha_url = None
+    wanted = arch or host_arch()
+    # ARM64 sans archive dédiée (anciennes releases) : la version x64 tourne en émulation.
+    # ARM64 without its own archive (older releases): the x64 version runs emulated.
+    for candidate in dict.fromkeys((wanted, "x64")):
+        name = asset_name(version, candidate)
+        if name in urls and f"{name}.sha256" in urls:
+            zip_url, sha_url = _https_only(urls[name]), _https_only(urls[f"{name}.sha256"])
+            break
     page = data.get("html_url")
     return Release(version, page if isinstance(page, str) else RELEASES_PAGE, zip_url, sha_url)
 

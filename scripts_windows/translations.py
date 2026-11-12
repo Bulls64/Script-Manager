@@ -364,4 +364,21 @@ EN: dict[str, str] = {
     "Réglages, favoris et scripts ajoutés à scripts.json sont conservés.": (
         "Settings, favorites and scripts added to scripts.json are kept."
     ),
+    (
+        "Version ARM64 pour les PC ARM (Snapdragon, PC Copilot+) : chaque release propose "
+        "aussi une archive « -arm64 », native, à côté de l’archive x64."
+    ): (
+        "ARM64 version for ARM PCs (Snapdragon, Copilot+ PCs): each release also has a native "
+        '"-arm64" archive next to the x64 one.'
+    ),
+    (
+        "Les mises à jour téléchargent l’archive du processeur : sur un PC ARM, la version x64 "
+        "émulée est remplacée par la version ARM64 native."
+    ): (
+        "Updates download the archive for the processor: on an ARM PC, the emulated x64 version "
+        "is replaced by the native ARM64 version."
+    ),
+    "Paramètres › Mises à jour affiche l’architecture à côté du numéro de version.": (
+        "Settings › Updates shows the architecture next to the version number."
+    ),
 }
