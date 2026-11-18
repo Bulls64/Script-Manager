@@ -2,6 +2,12 @@
 
 All notable changes to Script Manager. Versions before 2.17.0 were not published.
 
+## 2.22.0
+
+- Desktop shortcuts: a "Desktop shortcuts" button on the home page opens a window where you check scripts (built-in and favorites, grouped by section) and creates a `.lnk` for each on the Windows desktop, also when it is redirected to OneDrive. Each card's "…" menu has "Create a desktop shortcut".
+- A shortcut runs the `.bat` directly (administrator scripts ask for the rights themselves); an existing shortcut is never replaced, and scripts already on the desktop are shown as such.
+- Shared `CheckBox` and `ThemedDialog` widgets; the What's new window uses the latter.
+
 ## 2.21.0
 
 - New scripts, in the Registry section: `Desactiver-notifications` (app notifications, lock screen notifications and Windows tips, current account) and `Desactiver-widgets` (widgets policy for the whole computer, administrator), each with its `Restaurer-…` script. Both save the original state before the first change, through the shared helper `Reglages-Windows.bat`.

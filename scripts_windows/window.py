@@ -48,7 +48,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from . import __version__, core, i18n, updater, whatsnew
+from . import __version__, core, i18n, shortcuts, updater, whatsnew
 from .cards import ArrowsCard, ScriptCard
 from .core import (
     APP_NAME,
@@ -206,6 +206,9 @@ class MainWindow(QWidget):
         self.scripts_page.favorite_removed.connect(self.remove_favorite)
         self.scripts_page.launch_with_restore.connect(lambda card: self.launch_card(card, restore=True))
         self.scripts_page.arrows.connect(self.toggle_arrows)
+        self.scripts_page.shortcuts_requested.connect(self.choose_shortcuts)
+        self.scripts_page.shortcut_requested.connect(lambda script: self.create_shortcuts([script]))
+        self.shortcuts_dialog: shortcuts.ShortcutsDialog | None = None
         self.journal_page = JournalPage(core.read_journal(data_dir))
         self.settings_page = SettingsPage(
             settings.theme,
@@ -249,7 +252,9 @@ class MainWindow(QWidget):
         # Mises à jour : une tâche de fond à la fois, suivie par une minuterie.
         # Updates: one background task at a time, followed by a timer.
         self.release: updater.Release | None = None
-        self._task: tuple[Background, Callable[[object, str], None]] | None = None
+        # Tâches de fond en cours, par type (« update », « shortcuts ») : une seule de chaque à la fois.
+        # Background tasks in progress, by kind ("update", "shortcuts"): only one of each at a time.
+        self._tasks: dict[str, tuple[Background, Callable[[object, str], None]]] = {}
         self._task_timer = QTimer(self)
         self._task_timer.setInterval(150)
         self._task_timer.timeout.connect(self._poll_task)
@@ -480,6 +485,73 @@ class MainWindow(QWidget):
 
     # -- mises à jour / updates -------------------------------------------------------
 
+    # -- raccourcis sur le Bureau / desktop shortcuts --------------------------------
+
+    def all_scripts(self) -> list[core.Script]:
+        """Scripts intégrés puis favoris, dans l'ordre de l'interface.
+
+        Built-in scripts then favorites, in interface order.
+        """
+        return [*self.scripts, *(card.script for card in self.scripts_page.favorite_cards.values())]
+
+    def choose_shortcuts(self) -> None:
+        if self.shortcuts_dialog is not None and self.shortcuts_dialog.isVisible():
+            self.shortcuts_dialog.raise_()
+            return
+        dialog = shortcuts.ShortcutsDialog(self.all_scripts(), core.desktop_dir(), self)
+        dialog.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
+        dialog.accepted.connect(lambda: self.create_shortcuts(dialog.selected()))
+        dialog.finished.connect(self._shortcuts_closed)
+        self.shortcuts_dialog = dialog
+        dialog.open()
+
+    def _shortcuts_closed(self) -> None:
+        self.shortcuts_dialog = None
+
+    def create_shortcuts(self, scripts: list[core.Script]) -> None:
+        if not scripts:
+            return
+        if not IS_WINDOWS:
+            self.notify(
+                "caution", tr("Windows requis"), tr("Les raccourcis ne peuvent être créés que sous Windows.")
+            )
+            return
+        if "shortcuts" in self._tasks:
+            self.notify("info", tr("Raccourcis en cours"), tr("Attends la fin de la création en cours."))
+            return
+        self._run_background(
+            lambda: core.create_shortcuts(scripts, self.scripts_dir),
+            self._shortcuts_created,
+            "shortcuts",
+        )
+
+    def _shortcuts_created(self, result: object, error: str) -> None:
+        if not isinstance(result, core.ShortcutResult):
+            self.notify("critical", tr("Raccourcis non créés"), error)
+            return
+        for name in result.created:
+            log.info(tr("Raccourci créé sur le Bureau : %s"), name)
+        if result.failed:
+            log.warning(tr("Raccourcis non créés : %s (%s)"), ", ".join(result.failed), result.error)
+        parts = []
+        if result.created:
+            parts.append(
+                tr("{count} créé(s) : {names}.", count=len(result.created), names=", ".join(result.created))
+            )
+        if result.existing:
+            parts.append(tr("{count} déjà présent(s), laissé(s) tel(s) quel(s).", count=len(result.existing)))
+        if result.failed:
+            parts.append(
+                tr("{count} en échec : {names}.", count=len(result.failed), names=", ".join(result.failed))
+            )
+        if result.failed:
+            severity, title = "caution", tr("Raccourcis partiellement créés")
+        elif result.created:
+            severity, title = "success", tr("Raccourcis créés sur le Bureau")
+        else:
+            severity, title = "info", tr("Aucun raccourci créé")
+        self.notify(severity, title, " ".join(parts))
+
     def set_whats_new(self, enabled: bool) -> None:
         self.settings.whats_new = enabled
         self._save()
@@ -504,20 +576,22 @@ class MainWindow(QWidget):
         self.settings.update_check = enabled
         self._save()
 
-    def _run_background(self, function: Callable[[], object], done: Callable[[object, str], None]) -> None:
-        self._task = (Background(function), done)
+    def _run_background(
+        self, function: Callable[[], object], done: Callable[[object, str], None], kind: str = "update"
+    ) -> None:
+        self._tasks[kind] = (Background(function), done)
         self._task_timer.start()
 
     def _poll_task(self) -> None:
-        if self._task is None or not self._task[0].done:
-            return
-        task, done = self._task
-        self._task = None
-        self._task_timer.stop()
-        done(task.result, task.error)
+        for kind, (task, done) in list(self._tasks.items()):
+            if task.done:
+                del self._tasks[kind]
+                done(task.result, task.error)
+        if not self._tasks:
+            self._task_timer.stop()
 
     def check_updates(self, manual: bool = False) -> None:
-        if self._task is not None:
+        if "update" in self._tasks:
             return
         self.settings_page.set_update_status(tr("Recherche d’une nouvelle version…"), busy=True)
         self._run_background(
@@ -563,7 +637,7 @@ class MainWindow(QWidget):
 
     def install_update(self) -> None:
         release = self.release
-        if release is None or self._task is not None:
+        if release is None or "update" in self._tasks:
             return
         if not self.installable(release):
             QDesktopServices.openUrl(QUrl(release.page_url))

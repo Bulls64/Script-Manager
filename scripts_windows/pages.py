@@ -61,7 +61,13 @@ from .widgets import FluentCombo, Hero, IconView, SearchBox, ToggleSwitch, label
 
 # Scripts qui annulent un autre script, comptés dans le bandeau d'accueil.
 # Scripts that undo another script, counted in the home banner.
-UNDO_SCRIPTS = (ARROWS_OFF, "Retirer-elements-Bureau.bat", "Restaurer-animations.bat")
+UNDO_SCRIPTS = (
+    ARROWS_OFF,
+    "Retirer-elements-Bureau.bat",
+    "Restaurer-animations.bat",
+    "Restaurer-notifications.bat",
+    "Restaurer-widgets.bat",
+)
 
 SECTIONS = [
     ("bureau", N_("Bureau"), "desktop", N_("Raccourcis et dossiers ajoutés au Bureau.")),
@@ -143,6 +149,10 @@ class ScriptsPage(QWidget):
     arrows = Signal(object, bool)
     favorite_added = Signal(str)
     favorite_removed = Signal(str)
+    # Fenêtre de choix des raccourcis, ou raccourci d'une seule carte.
+    # Shortcut picker window, or the shortcut of a single card.
+    shortcuts_requested = Signal()
+    shortcut_requested = Signal(object)
 
     def __init__(
         self,
@@ -171,6 +181,12 @@ class ScriptsPage(QWidget):
         self.title = label(tr("Accueil"), "title")
         header.addWidget(self.title)
         header.addStretch(1)
+        self.shortcuts_button = QPushButton(tr("Raccourcis sur le Bureau"))
+        self.shortcuts_button.setToolTip(tr("Choisir des scripts et leur créer un raccourci sur le Bureau"))
+        self.shortcuts_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.shortcuts_button.clicked.connect(self.shortcuts_requested.emit)
+        header.addWidget(self.shortcuts_button, 0, Qt.AlignmentFlag.AlignVCenter)
+        header.addSpacing(8)
         self.search = SearchBox()
         self.search.textChanged.connect(self.apply_filter)
         header.addWidget(self.search, 0, Qt.AlignmentFlag.AlignVCenter)
@@ -227,6 +243,7 @@ class ScriptsPage(QWidget):
             script_card = ScriptCard(script, scripts_dir)
             script_card.launch.connect(self.launch.emit)
             script_card.launch_with_restore.connect(self.launch_with_restore.emit)
+            script_card.shortcut.connect(lambda c: self.shortcut_requested.emit(c.script))
             self.sections[script.category][1].add(script_card)
             self.script_cards[script.filename] = script_card
             self.cards.append(script_card)
@@ -328,6 +345,7 @@ class ScriptsPage(QWidget):
         card.launch_with_restore.connect(self.launch_with_restore.emit)
         card.launch_elevated.connect(self.launch_elevated.emit)
         card.unfavorite.connect(lambda c: self.favorite_removed.emit(c.script.filename))
+        card.shortcut.connect(lambda c: self.shortcut_requested.emit(c.script))
         self.favorite_cards[filename] = card
         self.favorites_grid.add(card)
         if refresh:

@@ -5,13 +5,9 @@
 
 from __future__ import annotations
 
-import contextlib
-import ctypes
-
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QPainter, QPaintEvent, QShowEvent
+from PySide6.QtGui import QPainter, QPaintEvent
 from PySide6.QtWidgets import (
-    QDialog,
     QFrame,
     QHBoxLayout,
     QPushButton,
@@ -23,14 +19,25 @@ from PySide6.QtWidgets import (
 from . import __version__, core
 from .i18n import N_, tr
 from .icons import AA
-from .theme import Theme, tok
-from .widgets import IconTile, label
+from .theme import tok
+from .widgets import IconTile, ThemedDialog, label
 
 # Nouveautés par version, la plus récente en premier. À compléter à chaque version :
 # un test vérifie que la version en cours a sa liste.
 # What's new per version, most recent first. To be filled in for each version:
 # a test checks that the current version has its list.
 NOTES: dict[str, tuple[str, ...]] = {
+    "2.22.0": (
+        N_(
+            "Nouveau bouton « Raccourcis sur le Bureau » sur l’accueil : coche des scripts, intégrés "
+            "ou favoris, et Script Manager leur crée un raccourci sur le Bureau de Windows."
+        ),
+        N_("Le menu « … » de chaque carte propose aussi « Créer un raccourci sur le Bureau »."),
+        N_(
+            "Un raccourci déjà présent n’est jamais remplacé, et le Bureau redirigé vers "
+            "OneDrive est pris en compte."
+        ),
+    ),
     "2.21.0": (
         N_(
             "Nouveau script « Désactiver les notifications » : notifications des applications, "
@@ -80,11 +87,6 @@ NOTES: dict[str, tuple[str, ...]] = {
     ),
 }
 
-# Fond opaque : la fenêtre n'a ni Mica ni transparence.
-# Opaque background: the window has neither Mica nor transparency.
-BACKGROUND = {True: "#202020", False: "#f3f3f3"}
-DWMWA_USE_IMMERSIVE_DARK_MODE = (20, 19)
-
 
 def notes(version: str = __version__) -> tuple[str, ...]:
     """Nouveautés traduites de ``version`` ; vide si elle n'en a pas.
@@ -117,12 +119,10 @@ class Bullet(QWidget):
         painter.drawEllipse(3, 7, 6, 6)
 
 
-class WhatsNewDialog(QDialog):
+class WhatsNewDialog(ThemedDialog):
     def __init__(self, parent: QWidget | None = None, version: str = __version__) -> None:
-        super().__init__(parent)
-        self.setObjectName("WhatsNew")
+        super().__init__(parent, "WhatsNew")
         self.setWindowTitle(tr("Nouveautés de la v{version}", version=version))
-        self.setStyleSheet(f"QDialog#WhatsNew {{ background: {BACKGROUND[Theme.dark]}; }}")
         self.setMinimumWidth(520)
         self.resize(560, 420)
 
@@ -169,14 +169,3 @@ class WhatsNewDialog(QDialog):
         close.clicked.connect(self.accept)
         footer.addWidget(close)
         root.addLayout(footer)
-
-    def showEvent(self, event: QShowEvent) -> None:
-        super().showEvent(event)
-        if not core.IS_WINDOWS:
-            return
-        # Barre de titre assortie au thème. / Title bar matching the theme.
-        with contextlib.suppress(AttributeError, OSError, ctypes.ArgumentError):
-            hwnd = int(self.winId())
-            for attribute in DWMWA_USE_IMMERSIVE_DARK_MODE:
-                if core.set_window_attribute(hwnd, attribute, int(Theme.dark)):
-                    break

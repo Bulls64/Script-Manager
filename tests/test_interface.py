@@ -503,10 +503,10 @@ def wait_for_task(qapp: Any, window: MainWindow) -> None:
     import time
 
     deadline = time.monotonic() + 5
-    while window._task is not None and time.monotonic() < deadline:
+    while window._tasks and time.monotonic() < deadline:
         qapp.processEvents()
         time.sleep(0.02)
-    assert window._task is None
+    assert not window._tasks
 
 
 @pytest.mark.parametrize(

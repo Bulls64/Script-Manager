@@ -9,6 +9,7 @@ This module does not import Qt: it can be tested anywhere, Windows or not.
 
 from __future__ import annotations
 
+import base64
 import ctypes
 import functools
 import json
@@ -17,7 +18,7 @@ import os
 import re
 import subprocess
 import sys
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from ctypes import wintypes
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -912,6 +913,124 @@ def downloads_dir() -> Path:
     if isinstance(value, str) and value.strip():
         return Path(os.path.expandvars(value))
     return Path.home() / "Downloads"
+
+
+def desktop_dir() -> Path:
+    """Bureau de l'utilisateur, même redirigé (OneDrive, autre lecteur).
+
+    The user's desktop, even when redirected (OneDrive, another drive).
+    """
+    value = read_registry("HKEY_CURRENT_USER", USER_SHELL_FOLDERS_KEY, "Desktop")
+    if isinstance(value, str) and value.strip():
+        return Path(os.path.expandvars(value))
+    return Path.home() / "Desktop"
+
+
+# -- raccourcis sur le Bureau / desktop shortcuts ------------------------------------
+
+INVALID_FILE_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
+SHORTCUT_NAME_MAX = 100
+CREATE_NO_WINDOW = 0x08000000
+RESERVED_NAMES = frozenset(
+    {"CON", "PRN", "AUX", "NUL", *(f"COM{i}" for i in range(1, 10)), *(f"LPT{i}" for i in range(1, 10))}
+)
+SHORTCUT_DESCRIPTION_MAX = 250
+# Création par l'objet COM WScript.Shell ; la liste arrive en JSON par une variable
+# d'environnement : aucun texte venant d'un script n'est interprété comme du code.
+# Created through the WScript.Shell COM object; the list arrives as JSON in an environment
+# variable: no text coming from a script is interpreted as code.
+SHORTCUT_SCRIPT = """
+$ErrorActionPreference = 'Stop'
+$shell = New-Object -ComObject WScript.Shell
+foreach ($item in @($env:SM_SHORTCUTS | ConvertFrom-Json)) {
+    try {
+        $link = $shell.CreateShortcut($item.path)
+        $link.TargetPath = $item.target
+        $link.WorkingDirectory = $item.folder
+        $link.Description = $item.description
+        $link.Save()
+    } catch {
+        [Console]::Error.WriteLine($_.Exception.Message)
+    }
+}
+"""
+
+
+def shortcut_name(title: str) -> str:
+    """Nom de fichier .lnk tiré du titre : caractères interdits par Windows retirés.
+
+    .lnk file name taken from the title: characters Windows forbids are removed.
+    """
+    name = " ".join(INVALID_FILE_CHARS.sub(" ", title).split()).strip(" .")[:SHORTCUT_NAME_MAX].strip(" .")
+    if name.upper() in RESERVED_NAMES:
+        name = f"Script {name}"
+    return f"{name or 'Script'}.lnk"
+
+
+@dataclass
+class ShortcutResult:
+    created: list[str] = field(default_factory=list)
+    existing: list[str] = field(default_factory=list)
+    failed: list[str] = field(default_factory=list)
+    error: str = ""
+
+
+def _run_shortcut_script(items: list[dict[str, str]]) -> str:
+    """Crée les raccourcis ; renvoie le message d'erreur de PowerShell, vide si tout va bien.
+
+    Creates the shortcuts; returns the PowerShell error message, empty when all is well.
+    """
+    encoded = base64.b64encode(SHORTCUT_SCRIPT.encode("utf-16-le")).decode("ascii")
+    env = {**os.environ, "SM_SHORTCUTS": json.dumps(items, ensure_ascii=True)}
+    command = [str(system32() / "WindowsPowerShell" / "v1.0" / "powershell.exe")]
+    command += ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-EncodedCommand", encoded]
+    done = subprocess.run(
+        command, env=env, capture_output=True, text=True, timeout=60, creationflags=CREATE_NO_WINDOW
+    )
+    return (done.stderr or "").strip()
+
+
+def create_shortcuts(
+    scripts: Iterable[Script],
+    scripts_folder: Path,
+    desktop: Path | None = None,
+    runner: Callable[[list[dict[str, str]]], str] = _run_shortcut_script,
+) -> ShortcutResult:
+    """Raccourcis .lnk vers les scripts, sur le Bureau ; un raccourci déjà présent n'est jamais remplacé.
+
+    .lnk shortcuts to the scripts, on the desktop; an existing shortcut is never replaced.
+    """
+    desktop = desktop or desktop_dir()
+    result = ShortcutResult()
+    items: list[dict[str, str]] = []
+    planned: set[str] = set()
+    for script in scripts:
+        name = shortcut_name(script.title)
+        target = scripts_folder / script.filename
+        if (desktop / name).exists() or name.lower() in planned:
+            result.existing.append(name)
+        elif not target.is_file():
+            result.failed.append(name)
+        else:
+            planned.add(name.lower())
+            items.append(
+                {
+                    "path": str(desktop / name),
+                    "target": str(target),
+                    "folder": str(scripts_folder),
+                    "description": script.description[:SHORTCUT_DESCRIPTION_MAX],
+                }
+            )
+    if not items:
+        return result
+    try:
+        result.error = runner(items)
+    except (OSError, subprocess.SubprocessError) as exc:
+        result.error = str(exc) or type(exc).__name__
+    for item in items:
+        name = Path(item["path"]).name
+        (result.created if Path(item["path"]).exists() else result.failed).append(name)
+    return result
 
 
 def drive_type(path: Path) -> int:

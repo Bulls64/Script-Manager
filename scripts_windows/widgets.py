@@ -7,6 +7,9 @@ notification, navigation pane, home banner…
 
 from __future__ import annotations
 
+import contextlib
+import ctypes
+
 from PySide6.QtCore import (
     Property,
     QEasingCurve,
@@ -28,10 +31,12 @@ from PySide6.QtGui import (
     QPainterPath,
     QPen,
     QRadialGradient,
+    QShowEvent,
 )
 from PySide6.QtWidgets import (
     QAbstractButton,
     QComboBox,
+    QDialog,
     QFrame,
     QHBoxLayout,
     QLabel,
@@ -40,9 +45,10 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from . import core
 from .i18n import tr
 from .icons import AA, paint_icon
-from .theme import tok
+from .theme import Theme, tok
 
 
 def label(text: str, role: str = "", wrap: bool = False) -> QLabel:
@@ -475,3 +481,82 @@ class GlassChip(QWidget):
         paint_icon(p, self.icon, QRectF(12, 9, 16, 16), QColor("white"))
         p.setPen(QColor("white"))
         p.drawText(QRectF(36, 0, r.width() - 40, r.height()), Qt.AlignmentFlag.AlignVCenter, self.text)
+
+
+class CheckBox(QAbstractButton):
+    """Case à cocher WinUI : carré arrondi, rempli de la couleur d'accent une fois cochée.
+
+    WinUI check box: rounded square, filled with the accent color once checked.
+    """
+
+    BOX, GAP = 20, 10
+
+    def __init__(self, text: str = "") -> None:
+        super().__init__()
+        self.setCheckable(True)
+        self.setText(text)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setAttribute(Qt.WidgetAttribute.WA_Hover)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+
+    def sizeHint(self) -> QSize:
+        metrics = self.fontMetrics()
+        width = self.BOX + (self.GAP + metrics.horizontalAdvance(self.text()) if self.text() else 0)
+        return QSize(width + 2, max(self.BOX, metrics.height()) + 4)
+
+    def paintEvent(self, _event: object) -> None:
+        p = QPainter(self)
+        p.setRenderHint(AA)
+        enabled = self.isEnabled()
+        top = (self.height() - self.BOX) / 2
+        box = QRectF(0.5, top + 0.5, self.BOX - 1, self.BOX - 1)
+        if self.isChecked():
+            p.setPen(Qt.PenStyle.NoPen)
+            p.setBrush(tok("accent") if enabled else tok("accent_disabled"))
+            p.drawRoundedRect(box, 4, 4)
+            check = QPainterPath()
+            check.moveTo(5.5, top + 10.5)
+            check.lineTo(8.5, top + 13.5)
+            check.lineTo(14.5, top + 7)
+            p.setPen(QPen(tok("on_accent"), 1.6, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
+            p.setBrush(Qt.BrushStyle.NoBrush)
+            p.drawPath(check)
+        else:
+            p.setPen(QPen(tok("text2") if enabled else tok("text3"), 1))
+            p.setBrush(tok("subtle") if (self.underMouse() and enabled) else Qt.GlobalColor.transparent)
+            p.drawRoundedRect(box, 4, 4)
+        if self.hasFocus():
+            p.setPen(QPen(tok("text"), 1))
+            p.setBrush(Qt.BrushStyle.NoBrush)
+            p.drawRoundedRect(box.adjusted(-2.5, -2.5, 2.5, 2.5), 6, 6)
+        if self.text():
+            p.setPen(tok("text") if enabled else tok("text3"))
+            area = QRectF(self.BOX + self.GAP, 0, self.width() - self.BOX - self.GAP, self.height())
+            p.drawText(area, int(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft), self.text())
+
+
+class ThemedDialog(QDialog):
+    """Fenêtre de dialogue au fond opaque et à la barre de titre assortie au thème.
+
+    Dialog window with an opaque background and a title bar matching the theme.
+    """
+
+    # Fond opaque : la fenêtre n'a ni Mica ni transparence.
+    # Opaque background: the window has neither Mica nor transparency.
+    BACKGROUND = {True: "#202020", False: "#f3f3f3"}
+    DWMWA_USE_IMMERSIVE_DARK_MODE = (20, 19)
+
+    def __init__(self, parent: QWidget | None, name: str) -> None:
+        super().__init__(parent)
+        self.setObjectName(name)
+        self.setStyleSheet(f"QDialog#{name} {{ background: {self.BACKGROUND[Theme.dark]}; }}")
+
+    def showEvent(self, event: QShowEvent) -> None:
+        super().showEvent(event)
+        if not core.IS_WINDOWS:
+            return
+        with contextlib.suppress(AttributeError, OSError, ctypes.ArgumentError):
+            hwnd = int(self.winId())
+            for attribute in self.DWMWA_USE_IMMERSIVE_DARK_MODE:
+                if core.set_window_attribute(hwnd, attribute, int(Theme.dark)):
+                    break

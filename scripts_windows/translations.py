@@ -401,4 +401,51 @@ EN: dict[str, str] = {
     ): (
         'Each has a "Restore" script that puts the original settings back. They are in the Registry section.'
     ),
+    "Annuler": "Cancel",
+    "Aucun raccourci créé": "No shortcut created",
+    "Choisir des scripts et leur créer un raccourci sur le Bureau": (
+        "Pick scripts and create a desktop shortcut for each"
+    ),
+    "Coche les scripts à placer sur le Bureau de Windows.": (
+        "Check the scripts to put on the Windows desktop."
+    ),
+    "Créer le raccourci": "Create shortcut",
+    "Créer un raccourci sur le Bureau": "Create a desktop shortcut",
+    "Créer {count} raccourcis": "Create {count} shortcuts",
+    "Déjà sur le Bureau": "Already on the desktop",
+    "Les raccourcis ne peuvent être créés que sous Windows.": "Shortcuts can only be created on Windows.",
+    "Raccourci créé sur le Bureau : %s": "Shortcut created on the desktop: %s",
+    "Raccourcis créés sur le Bureau": "Shortcuts created on the desktop",
+    "Raccourcis en cours": "Shortcuts in progress",
+    "Raccourcis non créés": "Shortcuts not created",
+    "Raccourcis non créés : %s (%s)": "Shortcuts not created: %s (%s)",
+    "Raccourcis partiellement créés": "Some shortcuts not created",
+    "Raccourcis sur le Bureau": "Desktop shortcuts",
+    "Tout désélectionner": "Clear all",
+    "Tout sélectionner": "Select all",
+    (
+        "Un raccourci lance le script directement, sans passer par Script Manager : "
+        "pas de point de restauration automatique ni de journal. Les scripts "
+        "administrateur demandent eux-mêmes les droits."
+    ): (
+        "A shortcut runs the script directly, without Script Manager: no automatic restore "
+        "point and no log. Administrator scripts ask for the rights themselves."
+    ),
+    "{count} créé(s) : {names}.": "{count} created: {names}.",
+    "{count} déjà présent(s), laissé(s) tel(s) quel(s).": "{count} already there, left as they are.",
+    "{count} en échec : {names}.": "{count} failed: {names}.",
+    (
+        "Nouveau bouton « Raccourcis sur le Bureau » sur l’accueil : coche des scripts, intégrés "
+        "ou favoris, et Script Manager leur crée un raccourci sur le Bureau de Windows."
+    ): (
+        'New "Desktop shortcuts" button on the home page: check scripts, built-in or favorites, '
+        "and Script Manager creates a shortcut for each on the Windows desktop."
+    ),
+    "Le menu « … » de chaque carte propose aussi « Créer un raccourci sur le Bureau ».": (
+        'The "…" menu of each card also has "Create a desktop shortcut".'
+    ),
+    (
+        "Un raccourci déjà présent n’est jamais remplacé, et le Bureau redirigé vers "
+        "OneDrive est pris en compte."
+    ): "An existing shortcut is never replaced, and a desktop redirected to OneDrive is handled.",
 }

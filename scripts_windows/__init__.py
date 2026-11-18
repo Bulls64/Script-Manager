@@ -3,4 +3,4 @@
 Script Manager: launcher for the Windows customization scripts.
 """
 
-__version__ = "2.21.0"
+__version__ = "2.22.0"

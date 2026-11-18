@@ -24,6 +24,7 @@ A Windows 11–style launcher for a set of Windows customization scripts: shutdo
 - **Appearance**: light, dark or system theme, six accent colors, Mica and a transparency slider on Windows 11.
 - **Language**: English, French or the Windows language.
 - **Updates**: checks this repository's releases at startup or on demand, and installs the new version in place.
+- **Desktop shortcuts**: the "Desktop shortcuts" button on the home page lets you check scripts and creates a shortcut to each on the Windows desktop (also from a card's "…" menu). A shortcut runs the script directly, without the app: no automatic restore point and no log. Existing shortcuts are never replaced.
 
 <p align="center">
   <img src="docs/screenshots/system-light.png" alt="System page, light theme" width="49%">
@@ -195,6 +196,7 @@ Un lanceur au style de Windows 11 pour une série de scripts de personnalisation
 - **Apparence** : thème clair, sombre ou système, six couleurs d’accentuation, Mica et curseur de transparence sous Windows 11.
 - **Langue** : français, anglais ou langue de Windows.
 - **Mises à jour** : vérifie les releases de ce dépôt au démarrage ou à la demande, et installe la nouvelle version sur place.
+- **Raccourcis sur le Bureau** : le bouton « Raccourcis sur le Bureau » de l’accueil permet de cocher des scripts et leur crée un raccourci sur le Bureau de Windows (aussi depuis le menu « … » d’une carte). Un raccourci lance le script directement, sans l’application : pas de point de restauration automatique ni de journal. Un raccourci existant n’est jamais remplacé.
 
 <p align="center">
   <img src="docs/screenshots/systeme-clair.png" alt="Page Système, thème clair" width="49%">

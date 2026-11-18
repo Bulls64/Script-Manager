@@ -34,6 +34,7 @@ class ScriptCard(QFrame):
     # Favorites only: run as administrator, remove from favorites.
     launch_elevated = Signal(object)
     unfavorite = Signal(object)
+    shortcut = Signal(object)
 
     def __init__(self, script: Script, scripts_dir: Path, favorite: bool = False) -> None:
         super().__init__()
@@ -133,6 +134,9 @@ class ScriptCard(QFrame):
         edit = menu.addAction(tr("Modifier le script"))
         edit.setEnabled(path.is_file() and hasattr(os, "startfile"))
         edit.triggered.connect(lambda: edit_file(path))
+        shortcut = menu.addAction(tr("Créer un raccourci sur le Bureau"))
+        shortcut.setEnabled(path.is_file())
+        shortcut.triggered.connect(lambda: self.shortcut.emit(self))
         if self.favorite:
             menu.addSeparator()
             remove = menu.addAction(tr("Retirer des favoris"))
