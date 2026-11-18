@@ -2,6 +2,11 @@
 
 All notable changes to Script Manager. Versions before 2.17.0 were not published.
 
+## 2.21.0
+
+- New scripts, in the Registry section: `Desactiver-notifications` (app notifications, lock screen notifications and Windows tips, current account) and `Desactiver-widgets` (widgets policy for the whole computer, administrator), each with its `Restaurer-…` script. Both save the original state before the first change, through the shared helper `Reglages-Windows.bat`.
+- Bell and widgets icons for their cards.
+
 ## 2.20.0
 
 - ARM64 version for ARM PCs (Snapdragon, Copilot+ PCs): each release now has `Script-Manager-<version>-arm64.zip` next to the x64 archive, built on a Windows ARM64 runner.

@@ -160,6 +160,23 @@ def _icon_paths(name: str) -> tuple[QPainterPath, QPainterPath | None]:
         s.cubicTo(15, 7.5, 17, 9.5, 17, 12)
         s.cubicTo(17, 14.5, 15, 16.5, 12, 16.5)
         s.lineTo(8, 16.5)
+    elif name == "bell":
+        s.moveTo(4.5, 14.5)
+        s.lineTo(5.5, 13)
+        s.lineTo(5.5, 9)
+        s.cubicTo(5.5, 6.2, 7.5, 4, 10, 4)
+        s.cubicTo(12.5, 4, 14.5, 6.2, 14.5, 9)
+        s.lineTo(14.5, 13)
+        s.lineTo(15.5, 14.5)
+        s.closeSubpath()
+        s.moveTo(8.2, 16.5)
+        s.cubicTo(8.6, 17.6, 11.4, 17.6, 11.8, 16.5)
+        s.moveTo(10, 4)
+        s.lineTo(10, 2.8)
+    elif name == "widgets":
+        s.addRoundedRect(3, 3, 6.5, 14, 1.5, 1.5)
+        s.addRoundedRect(11.5, 3, 5.5, 5.5, 1.5, 1.5)
+        s.addRoundedRect(11.5, 11.5, 5.5, 5.5, 1.5, 1.5)
     elif name == "grid":
         for x, y in ((3, 3), (11, 3), (3, 11), (11, 11)):
             s.addRoundedRect(x, y, 6, 6, 1.5, 1.5)

@@ -381,4 +381,24 @@ EN: dict[str, str] = {
     "Paramètres › Mises à jour affiche l’architecture à côté du numéro de version.": (
         "Settings › Updates shows the architecture next to the version number."
     ),
+    (
+        "Nouveau script « Désactiver les notifications » : notifications des applications, "
+        "de l’écran de verrouillage et conseils de Windows, pour le compte courant."
+    ): (
+        'New "Turn off notifications" script: app notifications, lock screen notifications '
+        "and Windows tips, for the current account."
+    ),
+    (
+        "Nouveau script « Désactiver les widgets » : bouton de la barre des tâches, panneau et "
+        "Windows+W, pour tout l’ordinateur (droits administrateur)."
+    ): (
+        'New "Turn off widgets" script: taskbar button, board and Windows+W, for the whole '
+        "computer (administrator rights)."
+    ),
+    (
+        "Chacun a son script « Restaurer » qui remet les réglages d’origine. "
+        "Ils sont dans la section Registre."
+    ): (
+        'Each has a "Restore" script that puts the original settings back. They are in the Registry section.'
+    ),
 }

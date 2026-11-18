@@ -88,6 +88,48 @@
       "icon": "undo"
     },
     {
+      "title": "Désactiver les notifications",
+      "title_en": "Turn off notifications",
+      "filename": "Desactiver-notifications.bat",
+      "description": "Coupe les notifications des applications, celles de l’écran de verrouillage et les conseils de Windows, pour le compte courant. L’état d’origine est enregistré avant la première modification.",
+      "description_en": "Turns off app notifications, lock screen notifications and Windows tips for the current account. The original state is saved before the first change.",
+      "registry": true,
+      "category": "registre",
+      "icon": "bell"
+    },
+    {
+      "title": "Restaurer les notifications",
+      "title_en": "Restore notifications",
+      "filename": "Restaurer-notifications.bat",
+      "description": "Annule la désactivation des notifications : remet les réglages d’origine du compte courant.",
+      "description_en": "Undoes turning off notifications: puts back the original settings of the current account.",
+      "registry": true,
+      "category": "registre",
+      "icon": "undo"
+    },
+    {
+      "title": "Désactiver les widgets",
+      "title_en": "Turn off widgets",
+      "filename": "Desactiver-widgets.bat",
+      "description": "Désactive les widgets pour tout l’ordinateur (bouton de la barre des tâches, panneau, Windows+W) par la stratégie prévue par Windows, puis propose de redémarrer l’Explorateur. L’état d’origine est enregistré avant la première modification.",
+      "description_en": "Turns off widgets for the whole computer (taskbar button, board, Windows+W) through the policy Windows provides, then offers to restart File Explorer. The original state is saved before the first change.",
+      "admin": true,
+      "registry": true,
+      "category": "registre",
+      "icon": "widgets"
+    },
+    {
+      "title": "Restaurer les widgets",
+      "title_en": "Restore widgets",
+      "filename": "Restaurer-widgets.bat",
+      "description": "Annule la désactivation des widgets : remet les réglages d’origine, puis propose de redémarrer l’Explorateur.",
+      "description_en": "Undoes turning off widgets: puts back the original settings, then offers to restart File Explorer.",
+      "admin": true,
+      "registry": true,
+      "category": "registre",
+      "icon": "undo"
+    },
+    {
       "title": "Nettoyer les points de restauration",
       "title_en": "Clean up restore points",
       "filename": "Supprimer-anciens-points-restauration.bat",

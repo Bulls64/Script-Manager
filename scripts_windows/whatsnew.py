@@ -31,6 +31,20 @@ from .widgets import IconTile, label
 # What's new per version, most recent first. To be filled in for each version:
 # a test checks that the current version has its list.
 NOTES: dict[str, tuple[str, ...]] = {
+    "2.21.0": (
+        N_(
+            "Nouveau script « Désactiver les notifications » : notifications des applications, "
+            "de l’écran de verrouillage et conseils de Windows, pour le compte courant."
+        ),
+        N_(
+            "Nouveau script « Désactiver les widgets » : bouton de la barre des tâches, panneau et "
+            "Windows+W, pour tout l’ordinateur (droits administrateur)."
+        ),
+        N_(
+            "Chacun a son script « Restaurer » qui remet les réglages d’origine. "
+            "Ils sont dans la section Registre."
+        ),
+    ),
     "2.20.0": (
         N_(
             "Version ARM64 pour les PC ARM (Snapdragon, PC Copilot+) : chaque release propose "

@@ -5,6 +5,7 @@ Encoding pitfalls of the Windows scripts, checked without Windows.
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -172,3 +173,38 @@ def test_animation_scripts_share_one_helper() -> None:
         assert f"Name = '{name}'" in script
     assert "$Max = 200" in script
     assert "$env:SM_ARG1 -eq 'restaurer'" in script
+
+
+@pytest.mark.parametrize(
+    ("group", "admin", "names"),
+    [
+        ("notifications", False, ("ToastEnabled", "NOC_GLOBAL_SETTING_ALLOW_TOASTS_ABOVE_LOCK")),
+        ("widgets", True, ("AllowNewsAndInterests", "EnableFeeds", "TaskbarDa")),
+    ],
+)
+def test_notification_and_widget_scripts_share_one_helper(
+    group: str, admin: bool, names: tuple[str, ...]
+) -> None:
+    """Désactiver et Restaurer passent par Reglages-Windows.bat, qui porte la liste des réglages.
+
+    Turn off and Restore go through Reglages-Windows.bat, which holds the list of settings.
+    """
+    off = (SCRIPTS / f"Desactiver-{group}.bat").read_text(encoding="ascii")
+    on = (SCRIPTS / f"Restaurer-{group}.bat").read_text(encoding="ascii")
+    assert f'call "%~dp0Reglages-Windows.bat" {group}\n' in off and "restaurer" not in off
+    assert f'call "%~dp0Reglages-Windows.bat" {group} restaurer\n' in on
+    for text in (off, on):
+        assert ("fltmc" in text) is admin
+    script = split_hybrid(SCRIPTS / "Reglages-Windows.bat")[1]
+    assert f"    {group} = @{{" in script
+    for name in names:
+        assert f"Name = '{name}'" in script
+    assert "$env:SM_ARG2 -eq 'restaurer'" in script
+
+
+def test_new_entries_match_their_scripts() -> None:
+    entries = {e["filename"]: e for e in json.loads((PROJECT / "scripts.json").read_text("utf-8"))["scripts"]}
+    for group, admin in (("notifications", False), ("widgets", True)):
+        for verb in ("Desactiver", "Restaurer"):
+            entry = entries[f"{verb}-{group}.bat"]
+            assert entry["registry"] is True and entry.get("admin", False) is admin

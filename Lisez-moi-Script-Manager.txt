@@ -14,6 +14,8 @@ click "More info", then "Run anyway".
 Undo:
 - Restaurer-fleche-raccourci.bat puts the shortcut arrows back.
 - Restaurer-animations.bat puts the display delays back.
+- Restaurer-notifications.bat and Restaurer-widgets.bat turn notifications
+  and widgets back on.
 - Retirer-elements-Bureau.bat removes the shortcuts and the God Mode folder
   created by these scripts.
 
@@ -33,6 +35,8 @@ clique sur « Informations complémentaires », puis « Exécuter quand même »
 Annulations :
 - Restaurer-fleche-raccourci.bat remet les flèches des raccourcis.
 - Restaurer-animations.bat remet les délais d'affichage.
+- Restaurer-notifications.bat et Restaurer-widgets.bat réactivent les
+  notifications et les widgets.
 - Retirer-elements-Bureau.bat retire les raccourcis et le dossier God Mode
   créés par ces scripts.
 

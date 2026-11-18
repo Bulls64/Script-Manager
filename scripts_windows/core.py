@@ -52,6 +52,8 @@ ICONS = (
     "terminal",
     "delete",
     "star",
+    "bell",
+    "widgets",
 )
 
 # Paire de scripts présentée comme un seul interrupteur dans l'interface.
@@ -278,7 +280,9 @@ def parse_scripts(data: Any) -> list[Script]:
 FAVORITES = "favoris"
 # Outils et scripts d'appoint du projet, jamais proposés en favori (noms en minuscules).
 # Project tools and helper scripts, never offered as favorites (lowercase names).
-NOT_FAVORITES = frozenset({"build.bat", "creer-point-restauration.bat", "animations-windows.bat"})
+NOT_FAVORITES = frozenset(
+    {"build.bat", "creer-point-restauration.bat", "animations-windows.bat", "reglages-windows.bat"}
+)
 FAVORITE_DESCRIPTION = N_("Script personnel, ajouté depuis le dossier des scripts.")
 
 

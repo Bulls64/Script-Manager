@@ -70,6 +70,8 @@ The first time a new version starts, a **What's new in v…** window lists its c
 | `Creer-dossier-GodMode` | The God Mode folder on the desktop | `Retirer-elements-Bureau` |
 | `Supprimer-fleche-raccourci` | Removes the arrow from shortcut icons (HKLM Registry, administrator) | `Restaurer-fleche-raccourci` |
 | `Reduire-animations` | Caps the submenu, hover and taskbar preview delays at 200 ms (HKCU Registry) | `Restaurer-animations` |
+| `Desactiver-notifications` | Turns off app notifications, lock screen notifications and Windows tips (HKCU Registry) | `Restaurer-notifications` |
+| `Desactiver-widgets` | Turns off widgets: taskbar button, board, Windows+W (HKLM policy, administrator) | `Restaurer-widgets` |
 | `Supprimer-anciens-points-restauration` | Deletes every restore point except the most recent, after confirmation (administrator) | Irreversible |
 | `Supprimer-fichiers-temporaires` | Empties the Temp folder of every account and `C:\Windows\Temp`, after showing the sizes and asking (administrator) | Irreversible |
 | `Lancer-Super-God-Mode` | Downloads and runs ThioJoe's [Super God Mode](https://github.com/ThioJoe/Windows-Super-God-Mode) | — |
@@ -92,6 +94,19 @@ Script file names and the messages shown in their console windows are in French;
 | `…\Explorer\Advanced\DesktopLivePreviewHoverTime` | Desktop peek (taskbar corner) | — |
 
 The original values are saved in `%LOCALAPPDATA%\Scripts-Windows\animations-origine.json` and restored by `Restaurer-animations`. No administrator rights are needed: only the current account changes.
+
+**Notifications and widgets.** `Desactiver-notifications` and `Desactiver-widgets` set the values below; `Restaurer-notifications` and `Restaurer-widgets` put back what was there before (a value that did not exist is removed again).
+
+| Value | Effect | Scope |
+| --- | --- | --- |
+| `HKCU\…\PushNotifications\ToastEnabled` = 0 | App and other senders' notifications | Current account |
+| `HKCU\…\Notifications\Settings\NOC_GLOBAL_SETTING_ALLOW_TOASTS_ABOVE_LOCK` = 0 | Notifications on the lock screen | Current account |
+| `HKCU\…\ContentDeliveryManager\SubscribedContent-338389Enabled` = 0 | Windows tips and suggestions | Current account |
+| `HKLM\SOFTWARE\Policies\Microsoft\Dsh\AllowNewsAndInterests` = 0 | Widgets (Windows 11), the "Allow widgets" policy | Whole computer |
+| `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Feeds\EnableFeeds` = 0 | News and interests (Windows 10) | Whole computer |
+| `HKCU\…\Explorer\Advanced\TaskbarDa` = 0 | Widgets taskbar button | Current account |
+
+Recent Windows 11 builds block scripts from writing `TaskbarDa`; the script then leaves it alone, since the policy already removes the button. Notification settings are saved in `%LOCALAPPDATA%\Scripts-Windows\notifications-origine.json`, widget settings in `%ProgramData%\Scripts-Windows\widgets-origine.json`. Apps already running may still show a notification until the next sign-in.
 
 **Temporary files.** `Supprimer-fichiers-temporaires` empties `AppData\Local\Temp` of every real account and `C:\Windows\Temp`. Files go straight away, not to the Recycle Bin. Files in use stay in place. Junctions and symbolic links are removed without being followed, so their targets are never touched.
 
@@ -226,6 +241,8 @@ Au premier lancement d’une nouvelle version, une fenêtre **Nouveautés de la 
 | `Creer-dossier-GodMode` | Dossier God Mode sur le Bureau | `Retirer-elements-Bureau` |
 | `Supprimer-fleche-raccourci` | Retire la flèche des raccourcis (Registre HKLM, administrateur) | `Restaurer-fleche-raccourci` |
 | `Reduire-animations` | Délais des sous-menus, du survol et des aperçus ramenés à 200 ms au plus (Registre HKCU) | `Restaurer-animations` |
+| `Desactiver-notifications` | Coupe les notifications des applications, de l’écran de verrouillage et les conseils de Windows (Registre HKCU) | `Restaurer-notifications` |
+| `Desactiver-widgets` | Désactive les widgets : bouton de la barre des tâches, panneau, Windows+W (stratégie HKLM, administrateur) | `Restaurer-widgets` |
 | `Supprimer-anciens-points-restauration` | Supprime tous les points de restauration sauf le plus récent, après confirmation (administrateur) | Irréversible |
 | `Supprimer-fichiers-temporaires` | Vide le dossier Temp de chaque compte et `C:\Windows\Temp`, après affichage des tailles et confirmation (administrateur) | Irréversible |
 | `Lancer-Super-God-Mode` | Télécharge et lance [Super God Mode](https://github.com/ThioJoe/Windows-Super-God-Mode) de ThioJoe | — |
@@ -248,6 +265,19 @@ Chaque `.bat` fonctionne aussi seul, par double-clic. Les scripts qui ont besoin
 | `…\Explorer\Advanced\DesktopLivePreviewHoverTime` | Aperçu du Bureau (coin de la barre des tâches) | — |
 
 Les valeurs d’origine sont enregistrées dans `%LOCALAPPDATA%\Scripts-Windows\animations-origine.json` et remises par `Restaurer-animations`. Aucun droit administrateur : seul le compte courant change.
+
+**Notifications et widgets.** `Desactiver-notifications` et `Desactiver-widgets` écrivent les valeurs ci-dessous ; `Restaurer-notifications` et `Restaurer-widgets` remettent ce qu’il y avait avant (une valeur absente à l’origine est de nouveau retirée).
+
+| Valeur | Effet | Portée |
+| --- | --- | --- |
+| `HKCU\…\PushNotifications\ToastEnabled` = 0 | Notifications des applications et des autres expéditeurs | Compte courant |
+| `HKCU\…\Notifications\Settings\NOC_GLOBAL_SETTING_ALLOW_TOASTS_ABOVE_LOCK` = 0 | Notifications sur l’écran de verrouillage | Compte courant |
+| `HKCU\…\ContentDeliveryManager\SubscribedContent-338389Enabled` = 0 | Conseils et suggestions de Windows | Compte courant |
+| `HKLM\SOFTWARE\Policies\Microsoft\Dsh\AllowNewsAndInterests` = 0 | Widgets (Windows 11), la stratégie « Autoriser les widgets » | Tout l’ordinateur |
+| `HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Feeds\EnableFeeds` = 0 | Actualités et centres d’intérêt (Windows 10) | Tout l’ordinateur |
+| `HKCU\…\Explorer\Advanced\TaskbarDa` = 0 | Bouton Widgets de la barre des tâches | Compte courant |
+
+Les versions récentes de Windows 11 empêchent les scripts d’écrire `TaskbarDa` ; le script la laisse alors telle quelle, la stratégie retirant déjà le bouton. Les réglages des notifications sont enregistrés dans `%LOCALAPPDATA%\Scripts-Windows\notifications-origine.json`, ceux des widgets dans `%ProgramData%\Scripts-Windows\widgets-origine.json`. Une application déjà ouverte peut encore afficher une notification jusqu’à la prochaine connexion.
 
 **Fichiers temporaires.** `Supprimer-fichiers-temporaires` vide `AppData\Local\Temp` de chaque compte réel et `C:\Windows\Temp`. Les fichiers ne passent pas par la Corbeille. Un fichier ouvert reste en place. Les jonctions et liens symboliques sont retirés sans être suivis : leur cible n’est jamais touchée.
 
